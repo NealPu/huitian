@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width" name="viewport" />
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta content="telephone=no" name="format-detection" />
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>罗德国际教育</title>
+<link rel="stylesheet" type="text/css" href="${cxt!}/static/css/common.css">
+<script type="text/javascript">
+	var cxt = "${cxt!}";
+	var showid = "${showinfo!}";
+</script>
+    <script>
+    function searcheDetail(brokerageids) {
+    	var url = cxt+'/counselor/brokerageDetail';
+        $.post(url, {ids:brokerageids}, function(json){
+        	  Util.showPage('detailId');
+            if(json&&json.code==0){
+            	var xh = 1;
+            	 var tr="<table><tr><th>序号</th><th>日期</th><th>姓名</th><th>科目</th><th>单价</th><th>比率</th><th>佣金</th></tr>";
+                for(i in json.data){
+                    tr += "<tr><td>"+xh+"</td><td>"+json.data[i].coursetime+"</td><td>"+json.data[i].studentname+"</td><td>"+json.data[i].subjectname+"</td><td>"+json.data[i].price+"</td><td>"+json.data[i].ratio+"</td><td>"+json.data[i].commission+"</td><td></tr>";
+                	xh++;
+                }
+                sjs('#detail').html(tr+"</table>");
+            }else{
+                //查询失败，显示错误提示
+                Util.showPage('jiesuan');
+                Util.showMsg(json.msg);
+            }
+            window.onhashchange = Util.doPage;
+        },'json');
+    }
+        Util = {
+            //显示页面
+            showPage:function(pageId){
+                location.hash = pageId;
+            },
+            doPage: function (e) {
+                var hash = location.hash;
+                var selectedArr = document.querySelectorAll("section[selected='true']");
+                for(var i=0;i<selectedArr.length;i++){
+                    sjs(selectedArr[i]).attr("selected","false");
+                }
+                sjs(hash).attr('selected','true');
+            },
+            //显示错误提示
+            showMsg:function(msg,obj,isfocus){
+                if (arguments.length == 1) {
+                    sjs('#msgbox').css('margin-top', '206px');
+                    sjs('#msgMask').removeClass('disno');
+                    sjs('#msgbox em').html(msg);
+                    return;
+                }
+                var box = sjs('body').getBox();
+                var h = 0;
+                if(!obj){
+                    var wh = window.innerHeight || document.documentElement.clientHeight;
+                    sjs('#msgMask').css('height', (box.height < 210 ? wh : box.height) + 'px');
+                    h = Math.abs(box.top) + wh / 2 - 15;
+                }else{
+                    h = Math.abs(box.top) + sjs(obj).getBox().top+52;
+                    if(!(isfocus&&isfocus==1)){
+                        obj.focus();
+                    }
+                }
+                sjs('#msgbox').css('margin-top', h + 'px');
+                sjs('#msgMask').removeClass('disno');
+                sjs('#msgbox em').html(msg);
+            }
+        }
+
+    </script>
+
+<script src="${cxt!}/static/js/Crow5.sjs.js"></script>
+</head>
+<body>
+	<section class="wrapper" id="jiesuan" >
+		<header class="header"> 佣金结算 </header>
+		<section class="main">
+			<div class="tab_width">
+				<div class="tab">
+					<table>
+						<tr>
+							<th>结算月份</th>
+							<th>返佣类型</th>
+							<th>返佣节数</th>
+							<th>返佣金额</th>
+						</tr>
+						<%if(isEmpty(brokerageList)){%>
+						<tr class="bg1" height="25px">
+							<td colspan="5">您还没有结算信息</td>
+						</tr>
+						<%}else{%>
+						<%for(brokerage in brokerageList){%>
+						<tr class="bg1" height="25px" onclick="searcheDetail('${brokerage.ids!}')">
+							<td>${brokerage.begindate!,dateFormat ="yyyy-MM"}</td>
+							<td>
+									<%if(brokerage["brokeragetype"] == '1'){%>
+										<span>推荐</span>
+									<%}else if(brokerage["brokeragetype"] == '2'){%>
+										<span>推广</span>
+									<%}%>
+							</td>
+							<td>${brokerage.coursetotal!}</td>
+							<td>${brokerage.moneysum!}</td>
+						</tr>
+						<%}%>
+						<%}%>						
+					</table>
+				</div>
+			</div>
+		</section>
+	</section>
+	<section class="wrapper" id="detailId"  selected="false">
+		<header class="header"> 佣金明细 </header>
+		<section class="main">
+			<div class="tab_width">
+				<div id="detail" class="tab">
+				</div>
+			</div>
+		</section>
+	</section>
+	<footer style="margin-top: 15px; margin-bottom: 5px">
+		<p align="center">&copy;
+			${i18nMap["admin.index.footer.left"]}-${i18nMap["admin.index.footer.right"]}
+		</p>
+	</footer>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width" name="viewport" />
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta content="telephone=no" name="format-detection" />
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>${company }</title>
+<link rel="stylesheet" type="text/css" href="${cxt!}/static/css/common.css">
+<script type="text/javascript">
+	var cxt = "${cxt!}";
+	var showid = "${showinfo!}";
+</script>
+<script src="${cxt!}/static/js/Crow5.sjs.js"></script>
+</head>
+<body>
+	<div class="wrapper" id="chengdan">
+		<header class="header"> 推广佣金 </header>
+		<div class="main">
+			<div class="tab_width">
+				<div class="tab">
+				<%if(isEmpty(counselor.spread)){%>
+					您还没有推广用户，赶快推广吧！
+				<%}else{%>
+					<%for(spread in counselor.spread){%>
+					<%if(isEmpty(spread)){%>
+						还没有推广，赶快去吧。
+					<%}else{%>
+						<%if(spread.key=="LV1"){%>
+							<table>
+								<caption align="top">LV1账户情况</caption>
+								<tr>
+									<td>姓名</td>
+									<td>推荐人数</td>
+									<td>成单人数</td>
+									<td>贡献佣金</td>
+								</tr>
+								<%for( spreader in spread.value.spreaders ){%>
+								<tr class="bg1" height="25px">
+									<td>${escapeXml(spreader["realname"]!) }</td>
+									<td>${spreader["tuijian"]! }</td>
+									<td>${spreader["chengdan"]! }</td>
+									<td>${spreader["yongjin"]! }</td>
+								</tr>
+								<%}%>
+							</table>
+						<%}else{%>
+							<table>
+								<caption align="top">${spread.key}账户情况</caption>
+								<tr>
+								<td>帐户数</td>
+								<td>推荐人数</td>
+								<td>成单人数</td>
+								<td>贡献佣金</td>
+								</tr>
+								<tr class="bg1" height="25px">
+									<td>${spread.value.total}</td>
+									<td>${spread.value.ztjs}</td>
+									<td>${spread.value.zcds}</td>
+									<td>${spread.value.zyj}</td>
+								</tr>
+							</table>		
+						<%}%>
+					<%}%>
+					<%}%>
+				<%}%>
+				</div>
+			</div>
+		</div>
+	</div>
+	<footer style="margin-top: 15px; margin-bottom: 5px">
+		<p align="center">&copy;
+			${company }
+		</p>
+	</footer>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width" name="viewport" />
+    <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+    <meta content="telephone=no" name="format-detection" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <title>${company }</title>
+    <link rel="stylesheet" type="text/css" href="${cxt!}/static/css/common.css">
+    <script type="text/javascript">
+		var cxt = "${cxt!}";
+		var showid = "${showinfo!}";
+	</script>	
+    <script src="${cxt!}/static/js/Crow5.sjs.js"></script>
+    <script>
+    	sjs(function(){
+    		//顾问注册手机号查询接口
+    		var regUrl = cxt+'/counselor/register';
+            var counselor = {
+                openid: null,
+                realname: null,
+                mobile: null,
+                email: null,
+                qq: null,
+                referrerMobile: null
+            };
+            Util.doPage();
+            if(showid!=''){
+            	Util.showPage(showid);
+            }else{
+	    		Util.showPage('searchId');
+            }
+    		sjs('#search').on('click',function(){
+	    		if(sjs('#realname').val()==''){
+	    			Util.showMsg('姓名不能为空');
+	    			return;
+	    		}
+	    		if(sjs('#mobile').val()==''){
+	    			Util.showMsg('手机号码不能为空');
+	    			return;
+	    		}
+	    		if(sjs('#email').val()==''){
+	    			Util.showMsg('邮箱不能为空');
+	    			return;
+	    		}
+	    		if(sjs('#qq').val()==''){
+	    			Util.showMsg('QQ号不能为空');
+	    			return;
+	    		}
+	    		if(sjs('#referrerMobile').val()==''){
+	    			Util.showMsg('推荐人手机号不能为空');
+	    			return;
+	    		}
+	    		var r = sjs('#realname').val().trim(),
+                m = sjs('#mobile').val().trim(),
+                e = sjs('#email').val().trim(),
+                q = sjs('#qq').val().trim(),
+                rm = sjs('#referrerMobile').val().trim();
+            if (Util.validateName(sjs('#realname'))) {
+                Util.showMsg('会员姓名请输入2-20位汉字或字母组合', sjs('#realname')[0]);
+                return;
+            }
+            if (Util.validatePhoneNum(m)!='') {
+                Util.showMsg('请输入正确的联系方式', sjs('#mobile')[0]);
+                return;
+            }
+            if (Util.validateEmail(e)!='') {
+                Util.showMsg('请输入正确的电子邮箱', sjs('#email')[0]);
+                return;
+            }
+            if (Util.validateQQ(q)!='') {
+                Util.showMsg('请输入正确的QQ号码', sjs('#qq')[0]);
+                return;
+            }
+            if (Util.validatePhoneNum(rm)!='') {
+                Util.showMsg('请输入推荐人正确的手机号吗', sjs('#referrerMobile')[0]);
+                return;
+            }
+                counselor.realname = sjs('#realname').val();
+                counselor.mobile = sjs('#mobile').val();
+                counselor.email = sjs('#email').val();
+                counselor.referrerMobile = sjs('#referrerMobile').val();
+                counselor.openid = sjs('#openid').val();
+                counselor.qq=q;
+                indexPage();
+    		});
+
+            function indexPage() {
+                $.post(regUrl, counselor, function(json){
+                    if(json&&json.code==0){
+                        Util.showPage('searchReslutId');
+                        window.searchData = json.data;
+                        for(i in json.data){
+                            if(i=='sex'){
+                                sjs('#sex_select').val(json.data[i]);
+                                continue;
+                            }
+                            if(i=='ids'){
+                                sjs('#idsV').val(json.data[i]);
+                                continue;
+                            }
+                            if(i=='cardholder'){
+                            	sjs('#'+i+"V").val("持卡人："+json.data[i]);
+                                continue;
+                            }
+                            if(i=='bankcard'){
+                            	sjs('#'+i+"V").val("银行卡："+json.data[i]);
+                                continue;
+                            }
+                            if(i=='bankname'){
+                            	sjs('#'+i+"V").val("开户行："+json.data[i]);
+                                continue;
+                            }
+                            if(sjs('#'+i+"V").length>0){
+                                sjs('#'+i+"V").html(json.data[i]);
+                            }
+                        }
+                    }else{
+                        //查询失败，显示错误提示
+                        Util.showPage('searchId');
+                        Util.showMsg(json.msg);
+                    }
+                    //var data = JSON.parse(json);
+                },'json');
+            }
+            
+            function searchByIds() {
+            	var searchUrl = cxt+'/counselor/searchByIds';
+                $.post(searchUrl, {ids:sjs('#idsV').val()}, function(json){
+                    if(json&&json.code==0){
+                        Util.showPage('searchReslutId');
+                        window.searchData = json.data;
+                        for(i in json.data){
+                            if(i=='sex'){
+                                sjs('#sex_select').val(json.data[i]);
+                                continue;
+                            }
+                            if(i=='ids'){
+                                sjs('#idsV').val(json.data[i]);
+                                continue;
+                            }
+                            if(i=='cardholder'){
+                            	sjs('#'+i+"V").html("持卡人："+json.data[i]);
+                                continue;
+                            }
+                            if(i=='bankcard'){
+                            	sjs('#'+i+"V").html("银行卡："+json.data[i]);
+                                continue;
+                            }
+                            if(i=='bankname'){
+                            	sjs('#'+i+"V").html("开户行："+json.data[i]);
+                                continue;
+                            }
+                            if(sjs('#'+i+"V").length>0){
+                                sjs('#'+i+"V").html(json.data[i]);
+                            }
+                        }
+                    }else{
+                        //查询失败，显示错误提示
+                        Util.showPage('searchId');
+                        Util.showMsg(json.msg);
+                    }
+                    //var data = JSON.parse(json);
+                },'json');
+            }
+
+    		//隐藏 提示框
+			sjs('#msgMask').on('click',function(e){
+				sjs('#msgMask').addClass('disno');
+			});
+
+            sjs('#changePassword').on('click', function () {
+                Util.showPage('changepswd');
+                sjs('#oldPass').val('');
+                sjs('#newPass').val('');
+                sjs('#newPass1').val('');
+            });
+
+            sjs('#changeBankinfo').on('click', function () {
+                Util.showPage('bankinfo');
+            });
+
+            var bankUrl = cxt+'/counselor/changeBank';
+            sjs('#changeBank').on('click', function () {
+                var a = sjs('#A_cardholder').val().trim(),
+                    b = sjs('#A_bankcard').val().trim(),
+                    c = sjs('#A_bankname').val().trim();
+                if (Util.validateName(sjs('#A_cardholder'))) {
+                    Util.showMsg('持卡人姓名请输入2-20位汉字或字母组合', sjs('#A_cardholder')[0]);
+                    return;
+                }
+                if (Util.validateBankcard(b)) {
+                    Util.showMsg('请输入正确的银行卡号', sjs('#A_bankcard')[0]);
+                    return;
+                }
+                if (Util.validateName(sjs('#A_bankname'))) {
+                    Util.showMsg('持卡人姓名请输入4-30位汉字或字母组合', sjs('#A_bankname')[0]);
+                    return;
+                }
+                var params = {
+                    cardholder: a,
+                    bankcard: b,
+                    bankname: c,
+                    ids:sjs('#idsV').val()
+                };
+                $.post(bankUrl, params, function (data) {
+                    if (data.code == 0) {
+                    	searchByIds();
+                    } else {
+                        Util.showMsg(data.msg, null);
+                    }
+                }, 'json');
+            });
+            var sexUrl = cxt+'/counselor/changeSex';
+            sjs('#sex_select').on('change', function () {
+            	var ids = "";
+            	if(typeof(window.searchData) == "undefined"){
+            		ids = sjs('#idsV').val();
+            	}else{
+            		ids = searchData.ids;
+            	}
+                $.post(sexUrl, {
+                    sex: this.value,
+                    ids: ids
+                }, function (data) {
+                    if (data.code != 0) {
+                        Util.showMsg(data.msg, null);
+                    }
+                }, 'json');
+            });
+
+            window.onhashchange = Util.doPage;
+
+    	});
+
+        Util = {
+            //显示页面
+            showPage:function(pageId){
+                location.hash = pageId;
+            },
+            doPage: function (e) {
+                var hash = location.hash;
+                var selectedArr = document.querySelectorAll("section[selected='true']");
+                for(var i=0;i<selectedArr.length;i++){
+                    sjs(selectedArr[i]).attr("selected","false");
+                }
+                sjs(hash).attr('selected','true');
+            },
+            //校验手机号
+            validatePhoneNum:function(phoneNum){
+            	var partten = /^((\(\d{3}\))|(\d{3}\-))?1[358]\d{9}$/;
+                if(phoneNum==''){
+                    return "请输入正确的手机号码（中国境内）"
+                }else if(partten.test(phoneNum)==false){
+                    return "请输入正确的手机号码（中国境内）";
+                }else{
+                    return "";
+                }
+            },
+            //校验电话
+            validateTel: function (tel) {
+                var phReg = /^0\d{2,4}-?\d{7,8}$/;
+                return !phReg.test(tel)&&Util.validatePhoneNum(tel)!=''
+            },
+            //校验名称
+            validateName: function (username) {
+                var par = /^[A-Za-z\u4e00-\u9fa5]+$/;
+                return username.val().length<2||username.val().length>20||!par.test(username.val());
+            },
+            //验证邮箱
+            validateEmail:function(email){
+                var partten = /^[a-zA-Z0-9][a-zA-Z0-9._-]*\@[a-zA-Z0-9]+\.[a-zA-Z0-9\.]+$/;
+                if(email==''){
+                    return '请输入正确的邮箱名';
+                }else if(partten.test(email)==false){
+                    return '请输入正确的邮箱名';
+                }else{
+                    return '';
+                }
+            },
+			//校验QQ
+            validateQQ:function(qq){
+                var partten= /^[1-9]{1}[0-9]{4,13}$/;
+                if(qq==''){
+                    return '';
+                }else if(partten.test(qq)==false){
+                    return 'QQ不正确，请确认';
+                }else{
+                    return '';
+                }
+            },
+            //校验银行卡
+            validateBankcard:function(bankcard){
+                var partten= /^[1-9]{1}[0-9]{18}$/;
+                if(bankcard==''){
+                    return '';
+                }else if(partten.test(bankcard)==false){
+                    return '银行卡号不正确，请确认';
+                }else{
+                    return '';
+                }
+            },
+            //显示错误提示
+            showMsg:function(msg,obj,isfocus){
+                if (arguments.length == 1) {
+                    sjs('#msgbox').css('margin-top', '206px');
+                    sjs('#msgMask').removeClass('disno');
+                    sjs('#msgbox em').html(msg);
+                    return;
+                }
+                var box = sjs('body').getBox();
+                var h = 0;
+                if(!obj){
+                    var wh = window.innerHeight || document.documentElement.clientHeight;
+                    sjs('#msgMask').css('height', (box.height < 210 ? wh : box.height) + 'px');
+                    h = Math.abs(box.top) + wh / 2 - 15;
+                }else{
+                    h = Math.abs(box.top) + sjs(obj).getBox().top+52;
+                    if(!(isfocus&&isfocus==1)){
+                        obj.focus();
+                    }
+                }
+                sjs('#msgbox').css('margin-top', h + 'px');
+                sjs('#msgMask').removeClass('disno');
+                sjs('#msgbox em').html(msg);
+            }
+        }
+
+    </script>
+</head>
+<body>
+    <section class="wrapper" id="searchId" selected="false" style='font-size:15px;'>
+        <header class="header">
+            意见反馈
+        </header>
+        <div class=bank>
+            <section>
+                <div class="bleft">意见类型：</div>
+                <div class="bright">
+                    <label >
+                        <select name="subject_select" id="subject_select">
+                        	<option value ="1" >佣金</option>
+                            <option value ="2" >课程</option>
+                            <option value ="3" >其它</option>    
+						</select>
+                    </label>
+                </div>
+            </section>
+            <section>
+                <div class="bleft">具体内容：</div>
+                <div class="bright"><textarea id="A_bankname"></textarea></div>
+            </section>
+        </div>
+        <div style="overflow: hidden;">
+            <div class="cx" id='changeBank'>
+                <input class="cxys" type="button"  value="提交" />
+            </div>
+        </div>
+    </section>
+    
+    
+    <section id="msgMask" class="msgMask disno" style="height: 500px;">
+            <div id="msgbox" class="msgbox" style="margin-top: 206px;"><img src="${cxt!}/static/images/error.png" height='20' /><em style="font-style: initial;font-size: 15px;"></em>
+            </div>
+    </section>
+    <section class="wrapper" id="searchReslutId"  selected="true">
+        <header class="header">
+             您的基本信息
+        </header>
+        <section class="main">
+        	<input type="hidden" id="idsV" value="${escapeXml(counselor['ids']!) }">
+            <section class="yhxx" style="border-bottom:none;border-radius:5px 5px 0 0;-webkit-border-radius:5px 5px 0 0;">
+                <span>顾问姓名</span>
+                <p id="realnameV">${escapeXml(counselor["realname"]!) }</p>
+            </section>
+            <section class="yhxx" style="border-bottom:none;">
+                <span>手机号</span>
+                <p id="mobileV">${escapeXml(counselor["mobile"]!) }</p>
+            </section>
+            <section class="yhxx" style="border-bottom:none;">
+                <span>电子邮箱</span>
+                <p id="emailV">${escapeXml(counselor["email"]!) }</p>
+            </section>
+            <section class="yhxx" style="border-bottom:none;">
+                <span>QQ号码</span>
+                <p id="qqV">${escapeXml(counselor["qq"]!) }</p>
+            </section>
+            <section class="yhxx" style="border-bottom:none;">
+                <span>性别</span>
+                <div class="sec_box">
+                    <label class="lab_sel">
+                        <select class="sex_select" name="sex_select" id="sex_select">
+                            <option value ="1" ${escapeXml(counselor.sex!) == "1" ? "selected='selected'":"" }>女</option>
+                            <option value ="2" ${escapeXml(counselor.sex!) == "2" ? "selected='selected'":"" }>男</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+            <section class="yhxx">
+                <span>注册日期</span>
+                <p id="regdateV">${counselor["regdate"]! }</p>
+            </section>
+            <div style="height:10px;"></div>
+            <section class="yhxx" style="border-bottom:none;">
+                <span>银行卡信息</span>
+                <div id="changeBankinfo" class="cgmima">绑定/变更</div>
+            </section>
+            <section class="Bankinfo">
+                <p id="banknameV">开户行：${escapeXml(counselor["bankname"]!) }</p>
+                <p id="cardholderV">持卡人：${escapeXml(counselor["cardholder"]!) }</p>
+                <p id="bankcardV">银行卡：${escapeXml(counselor["bankcard"]!) }</p>
+            </section>
+            <section class="xcips"><strong>温馨提示：</strong>手机号码及邮箱暂不提供线上修改，请联系客服。</section>
+        </section>
+    </section>
+
+    <section class="wrapper" id="bankinfo"  selected="true">
+        <header class="header">
+            银行卡信息
+        </header>
+        <div class=bank>
+            <section>
+                <div class="bleft">持卡人姓名：</div>
+                <div class="bright"><input id="A_cardholder" type="text" value="" /></div>
+            </section>
+            <section>
+                <div class="bleft">银行卡号：</div>
+                <div class="bright"><input id="A_bankcard" type="text" value="" /></div>
+            </section>
+            <section>
+                <div class="bleft">开户行名称：</div>
+                <div class="bright"><textarea id="A_bankname"></textarea></div>
+            </section>
+        </div>
+        <div style="overflow: hidden;">
+            <div class="cx" id='changeBank'>
+                <input class="cxys" type="button"  value="完成" />
+            </div>
+        </div>
+    </section>
+    
+	<footer style="margin-top: 15px;margin-bottom: 5px">
+		<p align="center">&copy; ${i18nMap["admin.index.footer.left"]}-${i18nMap["admin.index.footer.right"]} </p>
+	</footer>   
+</body>
+</html>

@@ -1,0 +1,4 @@
+#JobA
+a.job=com.momathink.common.quartz.SendCourseInfoJobPerday
+a.cron=30 30 17 * * ?
+a.enable=false

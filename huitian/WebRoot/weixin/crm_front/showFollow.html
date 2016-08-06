@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width" name="viewport" />
+    <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+    <meta content="telephone=no" name="format-detection" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <title>罗德国际教育</title>
+    <link rel="stylesheet" type="text/css" href="${cxt!}/static/css/common.css">
+    <script type="text/javascript">
+		var cxt = "${cxt!}";
+	</script>	
+    <script src="${cxt!}/ui/charisma/js/jquery-1.7.2.min.js"></script>
+	<script>
+	$(function(){
+        Util.doPage();
+        Util.showPage('searchId');
+        $('#additional').on('click', function () {
+            Util.showPage('followContent');
+            var a = $('#contactername').val().trim(),
+            b = $('#contacterids').val().trim(),
+            c = $('#subjectname').val().trim();
+            $('#A_contactername').val(a || '');
+            $('#A_contacterids').val(b || '');
+            $('#A_subjectname').val(c || '');
+        });
+		//隐藏 提示框
+		$('#msgMask').on('click',function(e){
+			$('#msgMask').addClass('disno');
+		});
+        var bankUrl = cxt+'/counselor/additionalInfo';
+        $('#additionalInfo').on('click', function () {
+        	$('#followContent').removeClass('disno');
+            var a = $('#A_contacterids').val().trim(),
+                b = $('#A_content').val().trim();
+            if (b.length<5||b.length>400) {
+                Util.showMsg('反馈内容在5到400字以内！', $('#A_content')[0]);
+                return;
+            }
+            var params = {
+                contacterIds: a,
+                content: b,
+            };
+            $.post(bankUrl, params, function (data) {
+                if (data.code == 0) {
+                	$('#wancheng').addClass('disno');
+                	//$('#A_content').val('');
+                	window.location.href=data.url;
+                	Util.showMsg('补充信息反馈成功！');
+                }else{
+                	Util.showMsg(data.msg);
+                }
+            }, 'json');
+        });
+
+        window.onhashchange = Util.doPage;
+
+	}
+	);
+
+    Util = {
+        //显示页面
+        showPage:function(pageId){
+            location.hash = pageId;
+        },
+        doPage: function (e) {
+            var hash = location.hash;
+            var selectedArr = document.querySelectorAll("section[selected='true']");
+            for(var i=0;i<selectedArr.length;i++){
+                $(selectedArr[i]).attr("selected","false");
+            }
+            $(hash).attr('selected','true');
+        },
+        //显示错误提示
+        showMsg:function(msg,obj,isfocus){
+            if (arguments.length == 1) {
+                $('#msgbox').css('margin-top', '206px');
+                $('#msgMask').removeClass('disno');
+                $('#msgbox em').html(msg);
+                return;
+            }
+            var box = $('body').getBox();
+            var h = 0;
+            if(!obj){
+                var wh = window.innerHeight || document.documentElement.clientHeight;
+                $('#msgMask').css('height', (box.height < 210 ? wh : box.height) + 'px');
+                h = Math.abs(box.top) + wh / 2 - 15;
+            }else{
+                h = Math.abs(box.top) + $(obj).getBox().top+52;
+                if(!(isfocus&&isfocus==1)){
+                    obj.focus();
+                }
+            }
+            $('#msgbox').css('margin-top', h + 'px');
+            $('#msgMask').removeClass('disno');
+            $('#msgbox em').html(msg);
+        }
+    }
+	function buchong(ids,name,subject){
+    	$('#followContent').removeClass('disno');
+    	$('#searchId').addClass('disno');
+        $('#A_contacterids').val(ids || '');
+        $('#A_contactername').val(name || '');
+        $('#A_subjectname').val(subject || '');
+    }
+	</script>
+</head>
+<body>
+    <div id="msgMask" class="msgMask disno" style="height: 500px;">
+            <div id="msgbox" class="msgbox" style="margin-top: 206px;"><img src="${cxt!}/static/images/error.png" height='20' /><em style="font-style: initial;font-size: 15px;"></em>
+            </div>
+    </div>
+    <div class="wrapper" id=searchId  selected="false">
+        <header class="header">
+             我的推荐跟进
+        </header>
+        <div class="main">
+        <%if(isEmpty(contacter)){%>
+                <span>您还没有推荐，赶快去推荐吧！</span>
+        <%}else{%>
+	            <div class="yhxx" style="margin-top: 15px; border-bottom:none;">
+	            	<input id="createtime" type="hidden" value="${contacter.createtime!,dateFormat ='yyyy-MM-dd'}">
+	            	<input id="contactername" type="hidden" value="${contacter.contactername!}">
+	            	<input id="subjectname" type="hidden" value="${contacter.subject_name}">
+	            	<input id="contacterids" type="hidden" value="${contacter.ids}">
+	                <span style="font-size: 15px">${contacter.createtime!,dateFormat ="yyyy-MM-dd"}${contacter.contactername!}咨询${contacter.subject_name}
+					<strong><%if(contacter["followresult"] == 1){%>跟进中<%}else if(contacter["followresult"] == 2){%>未成单<%}else if(contacter["followresult"] == 3){%>已成单<%}%></strong>
+					</span>
+	            </div>
+	            <div class="Bankinfo">
+				<% if(!isEmpty(contacter.contacterFollowList)){ %> 
+				<% for(follow in contacter.contacterFollowList){ %>
+				<%if(!isEmpty(follow.counselorids)){%>
+				<div>
+					<div>
+						<span>我:${follow.content!}</span>
+						<span>${follow.followtime!,dateFormat ="yyyy-MM-dd HH:mm:ss"}</span>
+					</div>
+				</div>	
+				<%}else{%>
+				<div class="talk_recordbox">
+					<div class="talk_recordtext">
+						<h3>CC:${follow.content!}</h3>
+						<span class="talk_time">${follow.followtime!,dateFormat ="yyyy-MM-dd HH:mm:ss"}</span>
+					</div>
+				</div>
+				<%}%>
+				<% }%> 
+				<% }%>
+		        <div class="cx" id='search' style="margin-top: 10px;">
+		            <input class="cxys" type="button"  value="补充内容" onclick="buchong('${contacter.ids}','${contacter.contactername!}','${contacter.subject_name}');"/>
+		        </div>         
+	            </div>
+        <%}%>
+    </div>
+    </div>
+
+    <div class="wrapper disno" id="followContent">
+        <header class="header">
+            补充信息
+        </header>
+        <div class=bank>
+            <div>
+                <div class="bright"><input id="A_contacterids" type="hidden" disabled="disabled"/></div>
+            </div>
+            <div>
+                <div class="bleft">联系人：</div>
+                <div class="bright"><input id="A_contactername" type="text" disabled="disabled"/></div>
+            </div>
+            <div>
+                <div class="bleft">咨询科目：</div>
+                <div class="bright"><input id="A_subjectname" type="text" disabled="disabled"/></div>
+            </div>
+            <div>
+                <div class="bleft">补充内容：</div>
+                <div class="bright"><textarea id="A_content"></textarea></div>
+            </div>
+        </div>
+        <div id="wancheng" style="overflow: hidden;">
+            <div class="cx" id='additionalInfo'>
+                <input class="cxys" type="button"  value="完成" />
+            </div>
+        </div>
+    </div>
+    
+	<footer style="margin-top: 15px;margin-bottom: 5px">
+		<p align="center">&copy; ${i18nMap["admin.index.footer.left"]}-${i18nMap["admin.index.footer.right"]} </p>
+	</footer>   
+</body>
+</html>
