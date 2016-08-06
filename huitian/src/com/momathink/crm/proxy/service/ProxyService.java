@@ -18,8 +18,10 @@ import com.momathink.common.base.SplitPage;
 import com.momathink.common.constants.DictKeys;
 import com.momathink.common.plugin.PropertiesPlugin;
 import com.momathink.common.tools.ToolDateTime;
+import com.momathink.common.tools.ToolMD5;
 import com.momathink.common.tools.ToolOperatorSession;
 import com.momathink.crm.proxy.model.Proxy;
+import com.momathink.sys.operator.model.Role;
 import com.momathink.sys.system.model.SysUser;
 
 public class ProxyService extends BaseService {
@@ -138,6 +140,26 @@ public class ProxyService extends BaseService {
 		proxy.put( "usableBalance" , proxyPredeposit );
 		
 		return proxy;
+	}
+
+	public void saveProxySysAccount( String proxyId , SysUser proxyAccount , Integer sysuserId ) {
+		SysUser account = SysUser.dao.findById( sysuserId );
+		boolean agents = ToolOperatorSession.judgeRole( "firstagents" , account.getStr( "roleids" ) );
+		String roleCode = "firstagents";
+		if( agents ) {
+			roleCode = "secondagents";
+		}
+		Role accountRole = Role.dao.getRoleByNumbers( roleCode );
+		
+		proxyAccount.set( "roleids" ,  accountRole.getInt( "id" ) + "," );
+		proxyAccount.set( "user_pwd" , ToolMD5.getMD5("111111") );
+		proxyAccount.set( "create_time" , ToolDateTime.getDate() );
+		proxyAccount.set( "createuserid" , sysuserId );
+		proxyAccount.set("state", "0");
+		boolean flag = proxyAccount.save();
+		if( flag ) {
+			Proxy.dao.updateProxyAccount( proxyAccount.getPrimaryKeyValue() , proxyAccount.getStr( "email" ) , proxyId );
+		}
 	}
 
 }

@@ -3,10 +3,15 @@ package com.momathink.crm.proxy.controller;
 import org.apache.log4j.Logger;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.i18n.I18n;
+import com.jfinal.i18n.Res;
 import com.momathink.common.annotation.controller.Controller;
 import com.momathink.common.base.BaseController;
+import com.momathink.common.constants.DictKeys;
+import com.momathink.common.plugin.PropertiesPlugin;
 import com.momathink.crm.proxy.model.Proxy;
 import com.momathink.crm.proxy.service.ProxyService;
+import com.momathink.sys.system.model.SysUser;
 
 @Controller( controllerKey="/proxy" )
 public class ProxyController extends BaseController {
@@ -54,6 +59,39 @@ public class ProxyController extends BaseController {
 		} catch (Exception e) {
 			log.error( "error" , e );
 		}
+	}
+	
+	public void openProxyAccount() {
+		String proxyId = getPara();
+		setAttr( "proxyId" , proxyId );
+		Proxy proxyInfo = Proxy.dao.findById( proxyId );
+		setAttr( "proxyInfo" , proxyInfo );
+		renderJsp( "openproxyaccount.jsp" );
+	}
+	
+	public void saveProxySysAccount() {
+		JSONObject resultJson = new JSONObject();
+		try {
+			String proxyId = getPara( "proxyId" );
+			SysUser proxyAccount = getModel(  SysUser.class );
+			proxyService.saveProxySysAccount( proxyId , proxyAccount , getSysuserId() );
+			
+			resultJson.put( "flag" , true );
+		} catch (Exception e) {
+			log.error( "saveProxySysAccount" , e );
+			Res res = I18n.use( ( String )PropertiesPlugin.getParamMapValue( DictKeys.basename ) , getCookie( "_locale" ) );
+			resultJson.put( "flag" , false );
+			resultJson.put( "msg" , res.get( "operationError" ) );
+		}
+		renderJson( resultJson );
+	}
+	
+	public void viewProxyAccount() {
+		String proxyId = getPara();
+		Proxy proxyAccountInfo = Proxy.dao.proxyWithAccountState( proxyId );
+		setAttr( "proxyAccount" , proxyAccountInfo );
+		renderJsp( "viewproxyaccount.jsp" );
+		
 	}
 	
 }

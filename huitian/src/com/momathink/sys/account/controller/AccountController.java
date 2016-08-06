@@ -550,11 +550,11 @@ public class AccountController extends BaseController {
 			if(ToolUtils.CheckKeyWord(email==null?"":email.replaceAll(" ", ""))){
 				renderJsp("/index.jsp");
 			}else{
-				String sql = "select * from account where email=? and user_pwd=? limit 1";
+				String sql = "select * from account where email=? and user_pwd=? and state = 0 limit 1";
 				Record account = Db.findFirst(sql, email, ToolMD5.getMD5(userPwd));
 				if (account == null) {
 					// 家长登录
-					String parentssql = "select * from account where parents_tel=? and user_pwd=? limit 1";
+					String parentssql = "select * from account where parents_tel=? and user_pwd=? and state = 0 limit 1";
 					account = Db.findFirst(parentssql, email, ToolMD5.getMD5(userPwd));
 				}
 				if (account == null) {

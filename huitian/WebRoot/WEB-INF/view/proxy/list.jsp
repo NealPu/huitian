@@ -136,7 +136,12 @@
 													<td>${proxy.commissioner } </td>
 													<td>${proxy.state eq '0' ? '正常' : '取消' } </td>
 													<td>
-														<a class="btn btn-xs btn-warning" href="/proxy/viewProxy/${proxy.id }" >查看</a>
+														<c:if test="${ empty proxy.sysaccountid }">
+															<a class="btn btn-xs btn-warning" onclick="openAccount( ${proxy.id } )" >开通账号</a>
+														</c:if>
+														<c:if test="${!empty proxy.sysaccountid }">
+															<a class="btn btn-xs btn-warning" onclick="viewAccount( ${proxy.id } )" >账号</a>
+														</c:if>
 														<a class="btn btn-xs btn-info" href="/proxy/viewProxy/${proxy.id }" >查看</a>
 														<a class="btn btn-xs btn-success" href="/proxy/editProxy/${proxy.id }" >编辑</a>
 														<a class="btn btn-xs btn-primary" href="javascript:void(0)" >项目</a>
@@ -183,6 +188,33 @@
 				laydate( endDate );
 				
 			} );
+			
+			/*   */
+			function openAccount( proxyId ) {
+				$.layer( {
+		    	    type: 2,
+		    	    shadeClose: false,
+		    	    title: "开通账号",
+		    	    closeBtn: [0, true],
+		    	    shade: [0.5, '#000'],
+		    	    offset:['50px', ''],
+				    area: ['700px', '300px'],
+		    	    iframe: {src: '${cxt}/proxy/openProxyAccount/' + proxyId }
+		    	} );
+			}
+			
+			function viewAccount( proxyId ) {
+				$.layer( {
+		    	    type: 2,
+		    	    shadeClose: false,
+		    	    title: "账号信息",
+		    	    closeBtn: [0, true],
+		    	    shade: [0.5, '#000'],
+		    	    offset:['50px', ''],
+				    area: ['700px', '300px'],
+		    	    iframe: {src: '${cxt}/proxy/viewProxyAccount/' + proxyId }
+		    	} );
+			}
 		
 		</script>
 	

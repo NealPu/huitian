@@ -82,10 +82,10 @@
 									<%-- <td>${roles.numbers }</td> --%>
 									<td>${roles.names }</td>
 									<td>${roles.intro}</td>
-									<td>${roles.id > 8?'自定义角色':'默认角色'}</td>
+									<td>${roles.id > 10?'自定义角色':'默认角色'}</td>
 									<td style="text-align:center;" >
 									<c:if test="${operator_session.qx_operatoreditthisRole }">
-									<c:if test="${roles.id > 8}">
+									<c:if test="${roles.id > 10}">
 										<a href="javascript:void(0);" onclick="eidtRole(${roles.id})" >${ _res.get('admin.common.edit')}</a>&nbsp;|&nbsp;
 									</c:if>
 									</c:if>
