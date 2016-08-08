@@ -11,6 +11,9 @@
 			td { text-align: center; }
 			th { cursor: pointer; }
 			.leftalign { text-align: left; }
+			#uploadFilePage {
+				display:none;
+			}
 		</style>
 		<script src="/js/js/jquery-2.1.1.min.js"></script>
 	</head>
@@ -72,12 +75,17 @@
 											<option value="1" ${paramMap['_query.type'] eq '1' ? 'selected="selected"' : '' } >机构</option>
 										</select>
 									</div>
+									<input type="hidden" name="_query.searchType" value="${paramMap['_query.searchType'] }" />
 									
 									<div class="flt m-t-sm m-l" >
-										<input type="button" onclick="search()" value="${_res.get('admin.common.select')}" class="btn btn-outline btn-primary">
+										<input type="button" onclick="research()" value="${_res.get('admin.common.select')}" 
+											class="btn btn-outline btn-primary">
 										<c:if test="${operator_session.qx_proxynewProxy }">
 											<a href="/proxy/newProxy" class="btn btn-outline btn-success">${_res.get('teacher.group.add')}</a>
+											<input type="button" id="batchImport" class="btn btn-outline btn-warning" 
+					         					value='导入' onclick="batchimport()" />
 										</c:if>
+										<a onclick="exportProxy()" class="btn btn-outline btn-info">导出</a>
 									</div>
 									<div style="clear:both;" ></div> 
 								</div>
@@ -133,10 +141,10 @@
 													<td class="leftalign" >${proxy.address } </td>
 													<td><fmt:formatDate value="${proxy.createdate }" pattern="yyyy-MM-dd" /> </td>
 													<td>${proxy.createname } </td>
-													<td>${proxy.commissioner } </td>
+													<td>${proxy.commissioner }</td>
 													<td>${proxy.state eq '0' ? '正常' : '取消' } </td>
 													<td>
-														<c:if test="${ empty proxy.sysaccountid }">
+														<c:if test="${ empty proxy.sysaccountid && proxy.state eq '0' }" >
 															<a class="btn btn-xs btn-warning" onclick="openAccount( ${proxy.id } )" >开通账号</a>
 														</c:if>
 														<c:if test="${!empty proxy.sysaccountid }">
@@ -162,7 +170,10 @@
 				</div>
 			</div>	  
 		</div>  
+		<jsp:include page="batchimport.jsp" />
+		
 		<jsp:include page="../basejs.jsp" />
+		<script type="text/javascript" src="/js/webuploader/ajaxfileupload.js" ></script>
 		<script type="text/javascript">
 			
 			$( document ).ready( function() {
@@ -215,7 +226,69 @@
 		    	    iframe: {src: '${cxt}/proxy/viewProxyAccount/' + proxyId }
 		    	} );
 			}
-		
+			
+			/* 查询 */
+			function research() {
+				$( "#searchForm input[name='_query.searchType']" ).val( "" );
+				search();
+			}
+			function exportProxy() {
+				$( "#searchForm input[name='_query.searchType']" ).val( "1" );
+				search();
+			}
+			
+			
+			var fileUploadLayer ;
+			function batchimport() {
+				fileUploadLayer =  $.layer( {
+				    type : 1,
+				    area : ['600px' , '230px'],
+				    title : "代理信息导入" ,
+				    page : { dom : '#uploadFilePage'  },
+				    close : function() {
+			    		$( "#progressBar" ).hide();
+				    	$( "#propressBarView" ).attr( "style" , "width: 45%;" );
+				    	$( "#searchForm" ).submit();
+				    }
+				} );
+		    }
+			    
+		    function submitBatchImport() {
+	    		$( "#progressBar" ).show();
+	    		$( ".xubox_close" ).hide();
+		    	$.ajaxFileUpload( {
+					contentType : "multipart/form-data",
+					url : "/proxy/importProxy",
+					fileElementId : "fileField",
+					type : "post",
+					dataType : "json",
+					success : function( result ) {
+			    		console.log( result );
+						var obj = $.parseJSON( result );
+			    		$( ".xubox_close" ).show();
+				    	$( "#propressBarView" ).attr( "style" , "width: 100%;" );
+			    		$( "#fileField" ).val("");
+			    		console.log( obj );
+			    		console.log( obj.flag );
+			    		console.log( obj.msg );
+						if ( obj.flag ) {
+							layer.msg( obj.msg , 3 , 1 );
+						} else {
+							layer.msg( obj.msg , 3 , 2 );
+						}
+					},
+				} );
+			}
+		    
+		    function resetBarView() {
+	    		$( "#progressBar" ).hide();
+		    	$( "#propressBarView" ).attr( "style" , "width: 45%;" );
+		    }
+		    
+		    function downloadTemplate() {
+		    	$( "#templateDownloadForm" ).submit();
+		    }
+	
 		</script>
 	
 	</body>

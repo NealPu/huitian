@@ -9,8 +9,16 @@ public class Proxy extends BaseModel<Proxy> {
 
 	private static final long serialVersionUID = -4599136050085925619L;
 	
-	public static final Proxy dao = new Proxy();
+	public final static String importProxyTemplateFile = "/upload/proxy/importfile/";
+	public final static String proxyImportTemplatePath = "/WEB-INF/files/download/template/proxy/proxyImportTemplate.xls";
+	
+	public static final String[] TabName = { "类型" , "姓名" , "联系电话" , "身份证号" , "所属公司" , "公司电话" , "所在地" , "通讯地址" , "服务专员" , "备注"  };
+	public static final String[] TabDBName = { "type" , "personname" , "tel" , "IDcard" , "companyname" , "companytel" , "location"  
+		, "address" , "commissioner" , "remark" };
 
+	public static final Proxy dao = new Proxy();
+	
+	
 	public void updateProxyAmounts( Integer proxyId, Double contractAmount ) {
 		String updateSql = " update proxy set predeposit = predeposit + ? where id = ? ";
 		Db.update( updateSql , contractAmount , proxyId );
@@ -37,6 +45,11 @@ public class Proxy extends BaseModel<Proxy> {
 		String querySql = " select proxy.id , proxy.personname , proxy.companyname ,proxy.type , proxy.sysaccountid , proxy.loginaccount , "
 				+ " account.state accountState from proxy left join account on proxy.sysaccountid = account.id where proxy.id = ? ";
 		return dao.findFirst( querySql , proxyId );
+	}
+
+	public Proxy queryCurrentProxyByIDNumber( String personIDcard ) {
+		String querySql = " select id ,IDcard from proxy where IDcard = ? ";
+		return dao.findFirst( querySql , personIDcard );
 	}
 	
 	

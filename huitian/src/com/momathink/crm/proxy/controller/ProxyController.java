@@ -1,10 +1,19 @@
 package com.momathink.crm.proxy.controller;
 
+import java.io.File;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Before;
 import com.jfinal.i18n.I18n;
 import com.jfinal.i18n.Res;
+import com.jfinal.kit.PathKit;
+import com.jfinal.kit.StrKit;
+import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
+import com.jfinal.upload.UploadFile;
 import com.momathink.common.annotation.controller.Controller;
 import com.momathink.common.base.BaseController;
 import com.momathink.common.constants.DictKeys;
@@ -24,8 +33,14 @@ public class ProxyController extends BaseController {
 	public void list() {
 		try {
 			Integer sysuserId = getSysuserId();
-			proxyService.proxyList( splitPage , sysuserId );
-			renderJsp( "list.jsp" );
+			String queryType = getPara( "_query.searchType" );
+			List< Record > recordList = proxyService.proxyList( splitPage , sysuserId );
+			if( StrKit.notBlank( queryType ) && "1".equals( queryType )  ) {
+				proxyService.exportProxyRecord( getResponse() , getRequest() , recordList );
+				renderNull();
+			} else {
+				renderJsp( "list.jsp" );
+			}
 		} catch (Exception e) {
 			log.error( "proxy.list" , e );
 			renderError( 500 );
@@ -91,7 +106,26 @@ public class ProxyController extends BaseController {
 		Proxy proxyAccountInfo = Proxy.dao.proxyWithAccountState( proxyId );
 		setAttr( "proxyAccount" , proxyAccountInfo );
 		renderJsp( "viewproxyaccount.jsp" );
-		
+	}
+	
+	@Before( Tx.class )
+	public void importProxy() {
+		JSONObject resultJson = new JSONObject();
+		UploadFile file = getFile( "fileField" , Proxy.importProxyTemplateFile );
+		String i18nState = getCookie( "_locale" );
+		if( null == file ) {
+			resultJson.put( "flag" , false );
+			Res resInfo = I18n.use( (String) PropertiesPlugin.getParamMapValue( DictKeys.basename ) ,  i18nState );
+			resultJson.put( "msg" , resInfo.get( "SelectYourFiles" ) );
+		} else {
+			resultJson = proxyService.importProxyRecord( file , getSysuserId() , i18nState  ) ;
+		}
+		renderJson( resultJson );
+	}
+	
+	public void downloadTemplate() {
+		File template = new File( PathKit.getWebRootPath() + Proxy.proxyImportTemplatePath );
+		renderFile( template );
 	}
 	
 }

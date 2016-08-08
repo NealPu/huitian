@@ -1,22 +1,40 @@
 package com.momathink.crm.proxy.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Before;
 import com.jfinal.i18n.I18n;
 import com.jfinal.i18n.Res;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
+import com.jfinal.upload.UploadFile;
 import com.momathink.common.base.BaseService;
 import com.momathink.common.base.SplitPage;
 import com.momathink.common.constants.DictKeys;
 import com.momathink.common.plugin.PropertiesPlugin;
+import com.momathink.common.tools.ExcelExportUtil;
+import com.momathink.common.tools.ExcelExportUtil.Pair;
 import com.momathink.common.tools.ToolDateTime;
 import com.momathink.common.tools.ToolMD5;
 import com.momathink.common.tools.ToolOperatorSession;
@@ -28,7 +46,7 @@ public class ProxyService extends BaseService {
 
 	private static final Logger log = Logger.getLogger( ProxyService.class );
 	
-	public void proxyList( SplitPage splitPage , Integer sysuserId ) {
+	public List< Record > proxyList( SplitPage splitPage , Integer sysuserId ) {
 		
 		List< Object > paramValue = new LinkedList<Object>();
 		StringBuilder fromSql = new StringBuilder();
@@ -88,13 +106,13 @@ public class ProxyService extends BaseService {
 		
 		
 		Page< Record > page = Db.paginate( splitPage.getPageNumber() , splitPage.getPageSize() , selectSql , fromSql.toString() , paramValue.toArray() );
-		/*List< Record > list = page.getList();
-		for( Record record : list ) {
+		List< Record > list = page.getList();
+		/*for( Record record : list ) {
 			
 			
 		}*/
 		splitPage.setPage(page);
-		
+		return list;
 	}
 
 	/* 保存代理 */
@@ -161,6 +179,236 @@ public class ProxyService extends BaseService {
 			Proxy.dao.updateProxyAccount( proxyAccount.getPrimaryKeyValue() , proxyAccount.getStr( "email" ) , proxyId );
 		}
 	}
+
+	public void exportProxyRecord( HttpServletResponse response , HttpServletRequest request , List< Record > recordList ) {
+		
+		for( Record record : recordList ) {
+			int typeVal = record.getInt( "type" ).intValue();
+			record.set( "typeName" , typeVal == 0 ? "个人" : "机构" );
+			record.set( "tel" , typeVal == 0 ? record.getStr( "tel" ) : record.getStr( "companytel" ) );
+			record.set( "stateName" , record.getInt( "state" ).intValue() == 0 ? "正常" : "取消" );
+			record.set( "createdate" , ToolDateTime.format( record.getDate( "createdate" )  , ToolDateTime.pattern_ymd ) );
+		}
+		
+		List< Pair > titles = new LinkedList< Pair >();
+		titles.add( new Pair( "typeName" , "类型" ) );
+		titles.add( new Pair( "personname" , "姓名" ) );
+		titles.add( new Pair( "companyname" , "机构名称" ) );
+		titles.add( new Pair( "tel" , "联系电话" ) );
+		titles.add( new Pair( "location" , "所在地" ) );
+		titles.add( new Pair( "address" , "通讯地址" ) );
+		titles.add( new Pair( "createdate" , "添加日期" ) );
+		titles.add( new Pair( "createname" , "创建人" ) );
+		titles.add( new Pair( "commissioner" , "服务专员" ) );
+		titles.add( new Pair( "stateName" , "状态" ) );
+		
+		ExcelExportUtil.exportByRecord( response , request , "代理列表", titles , recordList );
+		
+	}
+	
+	/**
+	 * 
+	 */
+	public JSONObject importProxyRecord( UploadFile file , Integer sysUserId , String i18nState ) {
+		JSONObject resultJson = new JSONObject();
+		
+		Res resInfo = I18n.use( (String) PropertiesPlugin.getParamMapValue( DictKeys.basename ) ,  i18nState );
+		String msg = "" ;
+		boolean flag = false;
+		try {
+			
+			String fileName = file.getFileName();
+			String path = file.getSaveDirectory() + fileName ;
+			if( fileName.toLowerCase().endsWith( ".xls" ) ) {
+				
+				Map< String , Object > flagList = dealDataByPath( path );
+				flag = (boolean) flagList.get("flag");
+				if ( !flag ) {
+					msg = resInfo.get( "UseCorrectTemplate" );
+				} else {
+					@SuppressWarnings("unchecked")
+					List< Map < String , String>> list = ( List < Map < String , String > > ) flagList.get("list"); // 分析EXCEL数据
+					Map<String, Object> saveMsg =  forAddXLSDB( list , sysUserId );
+					StringBuilder sb = new StringBuilder();
+					if( null != saveMsg.get( "save" ) && (Integer)saveMsg.get( "save" ) != 0  ) {
+						sb.append( "您成功导入了 " ).append( saveMsg.get("save") ).append( " 条代理信息  " );
+					}
+					if( !( (boolean)saveMsg.get( "saveflag" ) ) ) {
+						sb.append( "本次导入存在的问题如下：<br>" );
+						sb.append( flagList.get("errormsg") ).append("<br>	");
+						sb.append( saveMsg.get("saveMsg") );
+					}
+					msg = sb.toString();
+				}
+			}
+			
+		} catch ( Exception e ) {
+			log.error( "importProxyRecord" , e );
+			msg = resInfo.get( "dataHandleError" );
+			flag = false;
+		} finally {
+			File fe = new File( file.getSaveDirectory() + file.getFileName() );
+			fe.delete();
+		}
+		resultJson.put( "flag" , flag );
+		resultJson.put( "msg" , msg );
+		return resultJson;
+		
+	}
+
+	private Map< String , Object > dealDataByPath( String path ) {
+		
+		Map< String , Object > flagMap = new HashMap< String , Object >();
+		List< Map < String , String > > list = new ArrayList< Map < String , String > > ();
+		// 工作簿
+		HSSFWorkbook hwb = null;
+		flagMap.put( "flag" , false );
+		
+		try {
+			hwb = new HSSFWorkbook( new FileInputStream( new File( path ) ) );
+
+			HSSFSheet sheet = hwb.getSheetAt(0); // 获取到第一个sheet中数据
+			
+			HSSFRow titleRow = sheet.getRow( 0 );
+			HSSFCell titleRowCell = titleRow.getCell( 0 );
+			titleRowCell.setCellType(HSSFCell.CELL_TYPE_STRING);
+
+			// "判断是否为提供模版"
+			boolean flag = isProvidedModel( titleRow );
+			if ( !flag ) {
+				flagMap.put( "flag" , false );
+				return flagMap;
+			}
+			
+			int rowNums = sheet.getLastRowNum();
+			// "获取文件内容"
+			circle: for (int i = 1; i < rowNums + 1; i++ ) {// 第二行开始取值，第一行为标题行
+
+				HSSFRow row = sheet.getRow(i); // 获取到第i列的行数据(表格行)
+				if( null == row ) {
+					break circle ;
+				}
+
+				Map< String , String > map = new HashMap < String , String >();
+				mapmsg:for ( int j = 0 , tabSize = Proxy.TabName.length ; j < tabSize ; j++ ) {
+
+					HSSFCell cell = row.getCell( j ); // 获取到第j行的数据(单元格)
+					
+					//列标题
+					titleRowCell = titleRow.getCell( j );
+					titleRowCell.setCellType( HSSFCell.CELL_TYPE_STRING );
+					
+					if( cell == null && j == 0 ) {
+						break circle; // 第一列没有内容（NullPointException），结束整个excel的读取
+					}
+					if( cell == null && j != 0 ) {
+						continue mapmsg;
+					}
+
+					if ( cell != null ) {
+						cell.setCellType( HSSFCell.CELL_TYPE_STRING );
+						String obj = cell.getStringCellValue() ;
+						map.put( Proxy.TabDBName[j] , obj.trim() );
+					}
+				}
+				list.add(map);
+			}
+			flagMap.put( "list" , list );
+			flagMap.put( "flag" , true );
+		} catch ( FileNotFoundException e ) {
+			log.error( "importProxyDealData" , e );
+			e.printStackTrace();
+		} catch ( IOException e ) {
+			log.error( "importProxyDealData" , e );
+			e.printStackTrace();
+		}
+		return flagMap;
+	}
+	
+	private boolean isProvidedModel( HSSFRow titleRow ) {
+		List< String > strList = new ArrayList< String >();
+		for ( String tabName : Proxy.TabName ) {
+			strList.add( tabName );
+		}
+		
+		for ( int i = 0 , tabNameLength = Proxy.TabName.length ; i < tabNameLength ; i++ ) {
+			HSSFCell cellName = titleRow.getCell(i);
+			cellName.setCellType(HSSFCell.CELL_TYPE_STRING);
+			String realName = cellName.getStringCellValue();
+			if ( !( StrKit.notBlank( realName ) && strList.contains( realName.trim() ) ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	@Before( Tx.class )
+	private Map< String , Object > forAddXLSDB( final List< Map< String , String > > list , final Integer sysUserId  ) {
+
+		final Map< String, Object > saveMsg = new HashMap< String , Object >();
+		saveMsg.put( "saveflag" , true );
+		
+		final StringBuilder sb = new StringBuilder("");
+		
+		SysUser account = SysUser.dao.findById( sysUserId );
+		boolean agents = ToolOperatorSession.judgeRole( "firstagents" , account.getStr( "roleids" ) );
+		int proxyAgentState = 0;
+		if( agents ) {
+			proxyAgentState = 1;
+		}
+		
+		int save = 0;
+		for ( Map< String , String> map : list ) { 
+			Proxy proxy = new Proxy();
+			for ( Map.Entry< String , String > entry : map.entrySet() ) { 
+				if( Proxy.TabDBName[0].equals( entry.getKey() ) ) { //类型
+					proxy.set( "type" ,  "机构".equals( entry.getValue().trim() ) ? 1 : 0 );
+				} else {
+					proxy.set(entry.getKey(), entry.getValue() != null ? entry.getValue().trim() : entry.getValue() );
+				}
+			}
+			
+			try {
+				boolean saveFlag = saveImportProxy( proxy , sysUserId , proxyAgentState );
+				if ( saveFlag ) {
+					save++;
+					saveMsg.put( "save" , save );
+				} else {
+					sb.append( "学生姓名为：" ).append( proxy.getStr( "name" ) );
+					sb.append( " 、 学号为：" ).append( proxy.getStr( "num" ) );
+					sb.append( "<br>" );
+					saveMsg.put( "saveflag" , false );
+				}
+			}catch( Exception ex ) {
+				log.error( "importStudentSave" , ex );
+				saveMsg.put( "saveflag" , false );
+			}
+		}
+		
+		saveMsg.put( "saveMsg" , sb );
+		return saveMsg;
+	}
+	
+	private boolean saveImportProxy( Proxy proxy , Integer sysUserId , int proxyAgentState ) {
+		boolean flag = false;
+		String personIDcard = proxy.getStr( "IDcard" );
+		if( StrKit.notBlank( personIDcard ) ) { //填写了身份证号的导入，每填写的不导入
+			Proxy oldData = Proxy.dao.queryCurrentProxyByIDNumber ( personIDcard );
+			if( null != oldData && null != oldData.getInt( "id" ) ) { //导入的身份证已存在，更新数据
+				proxy.set( "id" , oldData.getInt( "id" ) );
+				flag = proxy.update();
+			} else {
+				proxy.set( "agents" , proxyAgentState );
+				proxy.set( "state" , 0 );
+				proxy.set( "createuserid" , sysUserId );
+				proxy.set( "createdate" , ToolDateTime.getDate() );
+				flag = proxy.save();
+			}
+		}
+		return flag;
+	}
+
+
 
 }
 
