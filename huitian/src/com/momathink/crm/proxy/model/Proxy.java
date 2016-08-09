@@ -51,6 +51,11 @@ public class Proxy extends BaseModel<Proxy> {
 		String querySql = " select id ,IDcard from proxy where IDcard = ? ";
 		return dao.findFirst( querySql , personIDcard );
 	}
+
+	public Proxy queryProxyByAccount( Integer sysUserId ) {
+		String querySql = " select id , personname , companyname ,type , state , createuserid from proxy where sysaccountid = ? ";
+		return dao.findFirst( querySql , sysUserId );
+	}
 	
 	
 

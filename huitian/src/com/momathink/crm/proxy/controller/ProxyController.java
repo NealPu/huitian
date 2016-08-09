@@ -18,8 +18,11 @@ import com.momathink.common.annotation.controller.Controller;
 import com.momathink.common.base.BaseController;
 import com.momathink.common.constants.DictKeys;
 import com.momathink.common.plugin.PropertiesPlugin;
+import com.momathink.common.tools.ToolOperatorSession;
 import com.momathink.crm.proxy.model.Proxy;
 import com.momathink.crm.proxy.service.ProxyService;
+import com.momathink.crm.proxyproject.model.CooperationProject;
+import com.momathink.crm.proxyproject.model.ProxyProject;
 import com.momathink.sys.system.model.SysUser;
 
 @Controller( controllerKey="/proxy" )
@@ -127,6 +130,77 @@ public class ProxyController extends BaseController {
 		File template = new File( PathKit.getWebRootPath() + Proxy.proxyImportTemplatePath );
 		renderFile( template );
 	}
+	
+	/**
+	 * 合作项目
+	 */
+	public void cooperationProject() {
+		String proxyId = getPara();
+		Proxy proxy = Proxy.dao.findById( proxyId );
+		setAttr( "proxy" , proxy );
+		
+		proxyService.cooperationProjectLists( splitPage , proxyId );
+		
+		renderJsp( "proxyproject.jsp" );
+	}
+	
+	/**
+	 * 结束合作
+	 */
+	public void endingCooperation() {
+		String cooperationId = getPara( "cooperationId" );
+		String i18nState = getCookie( "_locale" );
+		JSONObject resultJson = proxyService.endingCooperation( cooperationId , i18nState );
+		renderJson( resultJson );
+	}
+	
+	/**
+	 * 未合作项目
+	 */
+	public void uncooperationProject() {
+		String proxyId = getPara();
+		Proxy proxy = Proxy.dao.findById( proxyId );
+		setAttr( "proxy" , proxy );
+		proxyService.uncooperationProject( splitPage , proxyId );
+		renderJsp( "uncooperation.jsp" );
+	}
+	
+	/**
+	 * 
+	 */
+	public void toAddProxyProject() {
+		String proxyId = getPara(0); //处理的代理ID
+		String projectId = getPara(1); //项目的ID
+		String cooperationId = getPara(2); //一级代理合作中间表ID
+		
+		Proxy proxy = Proxy.dao.findById( proxyId );
+		setAttr( "proxy" , proxy );
+		
+		if( StrKit.notBlank( cooperationId ) ) {
+			ProxyProject cooperation = ProxyProject.dao.findById( cooperationId );
+			setAttr( "cooperation" , cooperation );
+		}
+		
+		CooperationProject project = CooperationProject.dao.findById( projectId );
+		setAttr( "project" , project );
+		
+		
+		renderJsp( "layer_surecoperate.jsp" );
+	}
+		
+		
+	
+	/**
+	 * 确认合作
+	 */
+	public void sureCooperate() {
+		String i18nState = getCookie( "_locale" );
+		ProxyProject project = getModel( ProxyProject.class );
+		JSONObject resultJson = proxyService.sureProjectCooperation( project , i18nState );
+		renderJson( resultJson );
+	}
+	
+	
 	
 }
 

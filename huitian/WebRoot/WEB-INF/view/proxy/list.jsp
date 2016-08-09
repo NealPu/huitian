@@ -96,20 +96,6 @@
 							<div class="ibox float-e-margins">
 								<div class="ibox-title">
 									<h5>代理列表</h5>
-									<!-- <div class="frt" >
-										<button class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" type="button" aria-expanded="false">
-											<i class="fa fa-list"></i>
-											<span class="caret"></span>
-										</button>
-										<ul class="dropdown-menu" role="menu" >
-											<li>
-												<label>
-												<input type="checkbox" checked="checked" value="0" data-field="字段0">
-												单元0
-												</label>
-											</li>
-										</ul>
-									</div> -->
 								</div>
 								<div class="ibox-content">
 									<table class="table table-hover table-bordered" width="100%">
@@ -152,7 +138,7 @@
 														</c:if>
 														<a class="btn btn-xs btn-info" href="/proxy/viewProxy/${proxy.id }" >查看</a>
 														<a class="btn btn-xs btn-success" href="/proxy/editProxy/${proxy.id }" >编辑</a>
-														<a class="btn btn-xs btn-primary" href="javascript:void(0)" >项目</a>
+														<a class="btn btn-xs btn-primary" href="/proxy/cooperationProject/${proxy.id }" >项目</a>
 														<a class="btn btn-xs btn-danger" href="/proxy/contract/proxyContract/${proxy.id }" >合同</a>
 													</td>
 												</tr>
@@ -263,14 +249,10 @@
 					type : "post",
 					dataType : "json",
 					success : function( result ) {
-			    		console.log( result );
 						var obj = $.parseJSON( result );
 			    		$( ".xubox_close" ).show();
 				    	$( "#propressBarView" ).attr( "style" , "width: 100%;" );
 			    		$( "#fileField" ).val("");
-			    		console.log( obj );
-			    		console.log( obj.flag );
-			    		console.log( obj.msg );
 						if ( obj.flag ) {
 							layer.msg( obj.msg , 3 , 1 );
 						} else {

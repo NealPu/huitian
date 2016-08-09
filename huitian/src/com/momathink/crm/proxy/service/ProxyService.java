@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +40,7 @@ import com.momathink.common.tools.ToolDateTime;
 import com.momathink.common.tools.ToolMD5;
 import com.momathink.common.tools.ToolOperatorSession;
 import com.momathink.crm.proxy.model.Proxy;
+import com.momathink.crm.proxyproject.model.ProxyProject;
 import com.momathink.sys.operator.model.Role;
 import com.momathink.sys.system.model.SysUser;
 
@@ -406,6 +408,123 @@ public class ProxyService extends BaseService {
 			}
 		}
 		return flag;
+	}
+
+	/**
+	 * 
+	 */
+	public void cooperationProjectLists( SplitPage splitPage , String proxyId ) {
+		StringBuilder fromSbSql = new StringBuilder();
+		List< Object > paramValue = new LinkedList< Object >();
+		Map< String , String > paramMap = splitPage.getQueryParam();
+		
+		String selectSql = " select proxy.id , proxy.createdate , proxy.state , proxy.startdate , proxy.enddate , project.projectname  ";
+		fromSbSql.append( " from proxyproject proxy left join cooperationproject project on project.id = proxy.projectid " );
+		fromSbSql.append( " where proxy.proxyid = ? " );
+		paramValue.add( proxyId );
+		
+		for( Map.Entry< String , String > entry : paramMap.entrySet() ) {
+			String entryKey = entry.getKey();
+			if( "projectName".equals( entryKey ) ) {
+				fromSbSql.append( " and project.projectname like ? " );
+				paramValue.add( "%" + entry.getValue() + "%"  );
+			}
+		}
+		
+		if( StrKit.isBlank( splitPage.getOrderColunm() ) || StrKit.isBlank( splitPage.getOrderMode() ) ) {
+			fromSbSql.append( " order by project.id desc " ); 	
+		}
+		
+		Page< Record > page = Db.paginate( splitPage.getPageNumber() , splitPage.getPageSize() , selectSql , fromSbSql.toString() , paramValue.toArray() );
+		splitPage.setPage( page );
+		
+	}
+
+	public JSONObject endingCooperation( String cooperationId , String i18nState ) {
+		JSONObject resultJson = new JSONObject();
+		try {
+			ProxyProject.dao.endingProjectCooperation( cooperationId , 1 );
+			resultJson.put( "flag" , true );
+		} catch (Exception e) {
+			log.error( "endingCooperation" , e );
+			Res res = I18n.use( (String) PropertiesPlugin.getParamMapValue(DictKeys.basename) , i18nState );
+			resultJson.put( "flag" , false );
+			resultJson.put( "msg" , res.get( "operationError" ) );
+		}
+		return resultJson;
+	}
+
+	public void uncooperationProject( SplitPage splitPage , String proxyId ) {
+		StringBuilder fromSbSql = new StringBuilder();
+		List< Object > paramValue = new LinkedList< Object >();
+		Map< String , String > paramMap = splitPage.getQueryParam();
+		
+		Proxy proxy = Proxy.dao.findById( proxyId );
+		String cooperatedId = ProxyProject.dao.queryProxyCooperatedIds( Integer.parseInt( proxyId ) );
+		
+		Integer parentProxyAccountId = proxy.getInt( "createuserid" );
+		SysUser account = SysUser.dao.findById( parentProxyAccountId );
+		boolean agents = ToolOperatorSession.judgeRole( "firstagents" , account.getStr( "roleids" ) );
+		
+		String selectSql = " select project.projectname , project.id  ";
+		if( agents ) {
+			selectSql += " , pro.proxyid , pro.id proId , pro.startdate , pro.enddate ";
+		}
+		
+		fromSbSql.append( " from cooperationproject project " );
+		if( agents ) {//二级代理的未合作项目从一级代理的合作项目中关联出来
+			fromSbSql.append( " left join proxyproject pro on pro.projectid = project.id " );
+		}
+		fromSbSql.append( " where project.state = 0 " );
+		
+		if( StrKit.notBlank( cooperatedId ) ) {
+			fromSbSql.append( " and project.id not in ( " ).append( cooperatedId ).append( " ) " );
+		}
+		
+		if( agents ) {
+			Proxy parentProxy = Proxy.dao.queryProxyByAccount( parentProxyAccountId );
+			fromSbSql.append( " and pro.proxyid = ? and pro.state = 0  " );
+			paramValue.add( parentProxy.getInt( "id" )  );
+		}
+		
+		for( Map.Entry< String , String > entry : paramMap.entrySet() ) {
+			String entryKey = entry.getKey();
+			if( "projectName".equals( entryKey ) ) {
+				fromSbSql.append( " and project.projectname like ? " );
+				paramValue.add( "%" + entry.getValue() + "%"  );
+			}
+		}
+		
+		Page< Record > page = Db.paginate( splitPage.getPageNumber() , splitPage.getPageSize() , selectSql , fromSbSql.toString() , paramValue.toArray() );
+		splitPage.setPage( page );
+		
+	}
+
+	public JSONObject sureProjectCooperation( ProxyProject project , String i18nState ) {
+		JSONObject resultJson = new JSONObject();
+		try {
+			
+			Date startDate = project.getDate( "startdate" );
+			if( null == startDate ) {
+				project.set( "startdate" , ToolDateTime.parse( "1900-01-01" , ToolDateTime.pattern_ymd ) );
+			}
+			Date endDate = project.getDate( "enddate" );
+			if( null == endDate ) {
+				project.set( "enddate" , ToolDateTime.parse( "9999-12-31" , ToolDateTime.pattern_ymd ) );
+			}
+			
+			project.set( "createdate" , ToolDateTime.getDate() );
+			project.set( "state" , 0 );
+			project.save();
+			
+			resultJson.put( "flag" , true );
+		} catch (Exception e) {
+			log.error( "sureProjectCooperation" , e );
+			Res res = I18n.use( (String) PropertiesPlugin.getParamMapValue(DictKeys.basename) , i18nState );
+			resultJson.put( "flag" , false );
+			resultJson.put( "msg" , res.get( "operationError" ) );
+		}
+		return resultJson;
 	}
 
 

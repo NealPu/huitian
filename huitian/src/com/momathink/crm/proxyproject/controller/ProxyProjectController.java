@@ -20,6 +20,7 @@ public class ProxyProjectController extends BaseController {
 	
 	/**
 	 * 我的合作项目
+	 * (乙方自己查看自己已合作的项目)(平台系统用户查看所有的合作项目)
 	 */
 	public void projectList() {
 		Integer sysUserId = getSysuserId();
@@ -37,11 +38,32 @@ public class ProxyProjectController extends BaseController {
 		renderJsp( "projectlist.jsp" );
 	}
 	
+	public void notCooperationList() {
+		Integer sysUserId = getSysuserId();
+		SysUser account = SysUser.dao.findById( sysUserId );
+		boolean secondAgents = ToolOperatorSession.judgeRole( "secondagents" , account.getStr( "roleids" ) );
+		setAttr( "secondAgents" , secondAgents );
+		
+		projectService.notCooperationProjectList( splitPage , sysUserId );
+		renderJsp( "nocooperation.jsp" );
+		
+	}
+	
+	/**
+	 * 对于二级代理 ，一级代理未合作的项目及为未对二级代理开放的项目
+	 */
+	public void notOpenedProject() {
+		Integer sysUserId = getSysuserId();
+		projectService.notOpenedProject( splitPage , sysUserId );
+		renderJsp( "notopened.jsp" );
+		
+	}
+	
 	
 	/**
 	 * 甲方操作代理的合作项目
 	 */
-	public void proxyproject() {
+	public void proxyProject() {
 		try {
 			String proxyId = getPara();
 			List< ProxyProject > proxyProject = ProxyProject.dao.currentProxyProjectList( proxyId );
