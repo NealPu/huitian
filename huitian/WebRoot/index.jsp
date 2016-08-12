@@ -35,7 +35,7 @@
                 </div>
                 <input type="submit" value="${_res.get('admin.login.submit') }" class="btn btn-primary block full-width m-b" id="dianji"/>
 
-                <p>建议使用<a href="http://www.google.cn/intl/zh-CN/chrome/browser/" title="谷歌" target="_blank">谷歌</a>或IE7及以上版本浏览器访问！</p>
+                <p>建议使用<a href="http://www.google.cn/intl/zh-CN/chrome/browser/" title="谷歌" target="_blank">谷歌</a>或IE9及以上版本浏览器访问！</p>
 
             </form>
          </div>

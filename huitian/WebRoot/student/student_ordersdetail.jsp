@@ -70,57 +70,57 @@ h5{
 						 <div style="clear: both;"></div>
 					</div>
 
-						<div class="col-lg-12" style="padding-left: 0;">
-							<div class="ibox float-e-margins">
-								<div class="ibox-title">
-									<h5>${_res.get("student_list") }</h5>
-								</div>
-								<div class="ibox-content">
-									<table class="table table-hover table-bordered">
-										<thead>
-											<tr>
-												<th >${_res.get("index")}</th>
-												<th >${_res.get("student.name")}</th>
-												<th >${_res.get('date.of.purchase')}</th>
-												<th >${_res.get('admin.dict.property.status')}</th>
-												<th >${_res.get('type.of.class')}</th>
-												<th >${_res.get('course.subject')}/${_res.get('classNum')}</th>
-												<th >${_res.get('total.amount')}</th>
-												<th >${_res.get('actual.amount')}</th>
-												<th >${_res.get('discount.amount')}</th>
-												<th >${_res.get('total.sessions')}</th>
-											</tr>
-										</thead>
-										<c:forEach items="${buylist}" var="orders" varStatus="index">
-											<tr align="center">
-												<td >${index.count }</td>
-												<td >${orders.studentname}</td>
-												<td ><fmt:formatDate value="${orders.createtime}" type="time" timeStyle="full" pattern="yyyy-MM-dd "/></td>
-												<td >
-													<c:choose>
-														<c:when test="${orders.delflag eq true }">
-															${_res.get('Cancelled')}
-														</c:when>
-														<c:otherwise>
-															${orders.status==0?'未支付':orders.status==1?'已支付':'欠费'}
-														</c:otherwise>
-													</c:choose>
-												</td>
-												<td >${orders.teachtype==1?_res.get("IEP"):_res.get('course.classes')}</td>
-												<td >${orders.teachtype==1?orders.subjectname:orders.classnum}</td>
-												<td >${orders.totalsum}</td>
-												<td >${orders.realsum}</td>
-												<td >${orders.rebate}</td>
-												<td >${orders.classhour}</td>
-										</c:forEach>
-									</table>
-									<div id="splitPageDiv">
-										<jsp:include page="/common/splitPage.jsp" />
-									</div>
-								</div>
-							</div>
+				</div>
+			</div>
+			<div class="col-lg-12"  >
+				<div class="ibox float-e-margins">
+					<div class="ibox-title">
+						<h5>${_res.get("student_list") }</h5>
+					</div>
+					<div class="ibox-content">
+						<table class="table table-hover table-bordered">
+							<thead>
+								<tr>
+									<th >${_res.get("index")}</th>
+									<th >${_res.get("student.name")}</th>
+									<th >${_res.get('date.of.purchase')}</th>
+									<th >${_res.get('admin.dict.property.status')}</th>
+									<th >${_res.get('type.of.class')}</th>
+									<th >${_res.get('course.subject')}/${_res.get('classNum')}</th>
+									<th >${_res.get('total.amount')}</th>
+									<th >${_res.get('actual.amount')}</th>
+									<th >${_res.get('discount.amount')}</th>
+									<th >${_res.get('total.sessions')}</th>
+								</tr>
+							</thead>
+							<c:forEach items="${buylist}" var="orders" varStatus="index">
+								<tr align="center">
+									<td >${index.count }</td>
+									<td >${orders.studentname}</td>
+									<td ><fmt:formatDate value="${orders.createtime}" type="time" timeStyle="full" pattern="yyyy-MM-dd "/></td>
+									<td >
+										<c:choose>
+											<c:when test="${orders.delflag eq true }">
+												${_res.get('Cancelled')}
+											</c:when>
+											<c:otherwise>
+												${orders.status==0?'未支付':orders.status==1?'已支付':'欠费'}
+											</c:otherwise>
+										</c:choose>
+									</td>
+									<td >${orders.teachtype==1?_res.get("IEP"):_res.get('course.classes')}</td>
+									<td >${orders.teachtype==1?orders.subjectname:orders.classnum}</td>
+									<td >${orders.totalsum}</td>
+									<td >${orders.realsum}</td>
+									<td >${orders.rebate}</td>
+									<td >${orders.classhour}</td>
+							</c:forEach>
+						</table>
+						<div id="splitPageDiv">
+							<jsp:include page="/common/splitPage.jsp" />
 						</div>
 					</div>
+				</div>
 			</div>
 			<div style="clear: both;"></div>
 	  </div>

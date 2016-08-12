@@ -61,9 +61,11 @@
 				<div class="ibox-content">
 				   <div>
 						<label style="float: left;margin:6px 0 0 0">${_res.get('Uploaded')}：</label> 
-						<input type="text" class="form-control layer-date" readonly="readonly" id="date1" name="_query.begindate" value="${begindate }" style="width:150px;background:#fff" />
+						<input type="text" class="form-control " readonly="readonly" id="date1" name="_query.begindate" value="${begindate }" 
+							style="width:150px;background-color:#fff;display: inline-block ;" />
 						--&nbsp;${_res.get('to')}&nbsp;--
-						<input type="text" class="form-control layer-date" readonly="readonly" id="date2" name="_query.enddate" value="${enddate }" style="width:150px;background:#fff" />&nbsp; 
+						<input type="text" class="form-control " readonly="readonly" id="date2" name="_query.enddate" value="${enddate }" 
+							style="width:150px;background-color:#fff;display: inline-block ;" />&nbsp; 
 					   
 					    <label>${_res.get('student')}：</label>
 						<input type="text" id="" name="_query.studentname" style="width:150px;" value="${studentname }">

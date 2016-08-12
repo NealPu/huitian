@@ -3,12 +3,14 @@ package com.momathink.teaching.teacher.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import com.alibaba.druid.util.StringUtils;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
@@ -247,12 +249,57 @@ public class TeacherController extends BaseController {
 					acc.set("account_id", teacherid).set("campus_id", str[i]).save();
 				}
 			}
+			//保存成功，推送信息到网校系统
 			json.put("code", 1);
-			json.put("msg", "保存成功");
+			
+			json.put("userName", teacher.getStr( "real_name" ) );
+			json.put("userEmail", teacher.getStr( "email" ) );
+			json.put("jwSysUserId", teacherid );
+			
+			long timestamp = System.currentTimeMillis();
+			json.put( "timestamp" , timestamp );
+			json.put( "signature" , ToolMD5.getMD5( ToolMD5.getMD5( timestamp + "huitian" ) ) );
+			
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			logger.error( "saveTeacherAccount" , ex );
+			json.put("code", 0);
+			json.put("msg", "保存异常，请刷新页面重试");
 		}
 		renderJson(json);
+	}
+	
+	public void manualBatchSynchroTeacherAccount() {
+		JSONObject pushSource = new JSONObject();
+		List< JSONObject > sourceList = new LinkedList< JSONObject >();
+		List< Teacher > unsynchroTeacherList = Teacher.dao.queryUnsynchroTeacherAccountList();
+		for( int i = 0 , size = unsynchroTeacherList.size() ; i < size ; i++ ) {
+			Teacher teacherAccount = unsynchroTeacherList.get( i );
+			JSONObject teacherSource = new JSONObject();
+			teacherSource.put( "jwSysUserId" , teacherAccount.getInt( "id" ) );
+			teacherSource.put( "userName" , teacherAccount.getStr( "REAL_NAME" ) );
+			teacherSource.put( "userEmail" , teacherAccount.getStr( "EMAIL" ) );
+			sourceList.add( teacherSource );
+		}
+		pushSource.put( "list" , sourceList );
+		
+		long timestamp = System.currentTimeMillis();
+		pushSource.put( "timestamp" , timestamp );
+		pushSource.put( "signature" , ToolMD5.getMD5( ToolMD5.getMD5( timestamp + "huitian" ) ) );
+		
+		renderJson( pushSource );
+	}
+	
+	public void manualBatchPushResult() {
+		String sourceList = getPara( "list" ) ;
+		JSONArray jsonArr = JSONArray.parseArray( sourceList );
+		long arrSize = jsonArr.size() ;
+		for( int i = 0 ; i < arrSize ; i ++ ) {
+			JSONObject accountJson = jsonArr.getJSONObject( i );
+			if( "1".equals( accountJson.getString( "code" ) )  ) {
+				Teacher.dao.updateTeacherNetAccountId( accountJson.getString( "jwSysUserId" ) , accountJson.getString( "netAccountId" ) );
+			}
+		}
+		renderJson( "msg" , "Success!" );
 	}
 
 	/**

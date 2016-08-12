@@ -537,7 +537,7 @@ public class AccountController extends BaseController {
 
 	public void login() {
 		try {
-			renderJsp("/index.jsp");
+			renderJsp( "/index.jsp" );
 		} catch (Exception ex) {
 			logger.error(ex.toString());
 		}

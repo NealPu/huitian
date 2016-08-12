@@ -62,33 +62,34 @@ input[type="radio"] {
 </style>
 </head>
 <body>
-<div id="wrapper" style="background: #2f4050;">
-	 <%@ include file="/common/left-nav.jsp"%>
-       <div class="gray-bg dashbard-1" id="page-wrapper">
-		<div class="row border-bottom">
-				<nav class="navbar navbar-static-top" role="navigation" style="margin-left:-15px;position:fixed;width:100%;background-color:#fff;border:0">
+	<div id="wrapper" style="background: #2f4050;">
+		<%@ include file="/common/left-nav.jsp"%>
+		<div class="gray-bg dashbard-1" id="page-wrapper">
+			<div class="row border-bottom">
+				<nav class="navbar navbar-static-top fixtop" role="navigation" >
 					<%@ include file="/common/top-index.jsp"%>
 				</nav>
-		</div>
+			</div>
 
-        <div class="col-lg-12" style="margin-top: 80px;padding-left:0;">
-		<div class="ibox float-e-margins" style="margin-bottom: 0px;">
-			<div class="ibox-title" style="width:100%">
-				   <h5>
-						<img alt="" src="/images/img/currtposition.png" width="16" style="margin-top:-1px">&nbsp;&nbsp;<a href="javascript:window.parent.location='/account'">${_res.get('admin.common.mainPage')}</a> 
-						&gt;<a href='/student/index'>${_res.get('student_management')}</a> &gt;
-						<a href='javascript:history.go(-1);'>学生列表</a>&gt;  学生档案
-				   </h5>
-				   <a onclick="window.history.go(-1)" href="javascript:void(0)" class="btn btn-outline btn-primary btn-xs" style="float: right">${_res.get("system.reback")}</a>
-			       <div style="clear: both;"></div>
-			</div>
-	<div class="ibox float-e-margins" style="margin-bottom: 0">
-		<div class="ibox-content">
-			<div style="height: 300px;">
-				<p>
-					<iframe id="ifstu" name="ifstu" width=100% height=200px;  frameborder=0 scrolling=no src="/student/head.jsp"> </iframe>
-				</p>
-			</div>
+        	<div class="col-lg-12" style="margin-top: 80px;padding-left:0;">
+				<div class="ibox float-e-margins" style="margin-bottom: 0px; max-width: 1086px;">
+					<div class="ibox-title" style="width:100%">
+				    	<h5>
+							<img alt="" src="/images/img/currtposition.png" width="16" style="margin-top:-1px">&nbsp;&nbsp;
+							<a href="javascript:window.parent.location='/account'">${_res.get('admin.common.mainPage')}</a> 
+							&gt;<a href='/student/index'>${_res.get('student_management')}</a> &gt;
+							<a href='javascript:history.go(-1);'>学生列表</a>&gt;  学生档案
+				    	</h5>
+				   		<a onclick="window.history.go(-1)" href="javascript:void(0)" class="btn btn-outline btn-primary btn-xs" style="float: right">${_res.get("system.reback")}</a>
+			       		<div style="clear: both;"></div>
+					</div>
+					<div class="ibox float-e-margins" style="margin-bottom: 0">
+						<div class="ibox-content">
+							<div style="height: 300px;">
+								<p>
+									<iframe id="ifstu" name="ifstu" width=100% height=200px;  frameborder=0 scrolling=no src="/student/head.jsp"> </iframe>
+								</p>
+							</div>
 			<div style="margin-top: -300px;">
 				<form action="" method="post" id="studentForm" enctype="multipart/form-data">
 					<input type="hidden" name="student.id" id="studentId" value="${student.id}" />
@@ -348,7 +349,9 @@ input[type="radio"] {
 	</div>
 		</div>
 		</div>
+		<div style="clear:both;" ></div>
 		</div>
+		<div style="clear:both;" ></div>
 	 </div>	
 	<!-- Mainly scripts -->
 	<script src="/js/js/jquery-2.1.1.min.js"></script>

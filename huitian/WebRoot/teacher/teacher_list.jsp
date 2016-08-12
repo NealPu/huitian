@@ -36,6 +36,9 @@
 .xubox_tabnow{
     color:#31708f;
 }
+.frt { 
+	float: right;
+}
 </style>
 </head>
 <body>
@@ -81,6 +84,9 @@
 				<div class="ibox float-e-margins">
 					<div class="ibox-title">
 						<h5>${_res.get('faculty_list')}</h5>
+						<c:if test="${operator_session.qx_teachermanualBatchSynchroTeacherAccount }">
+							<a  class="btn btn-xs btn-primary frt m-r-md " onclick="manualSynchroTeacherAccount()" >同步到网校</a>
+						</c:if>
 					</div>
 					<div class="ibox-content">
 						<table class="table table-hover table-bordered" width="100%">
@@ -318,6 +324,38 @@ function toCoursecostPage(id){
 	    iframe: {src: '${cxt}/teacher/coursecost/toCoursecostPage/'+id}
 	});
 }
+
+
+function manualSynchroTeacherAccount() {
+	$.ajax( {
+		url : "/teacher/manualBatchSynchroTeacherAccount",
+		dataType : "json",
+		async : false,
+		success : function( source ) {
+			$.ajax( {
+				url : "",
+				data : source , 
+				dataType : "json",
+				type : "post",
+				async : false,
+				success : function( pushResult ) {
+					$.ajax( {
+						url : "/teacher/manualBatchPushResult",
+						data : pushResult,
+						dataType : "json",
+						type : "post",
+						async : false,
+						success  :function( result ) {
+							layer.msg( result.msg , 2 , 2 );
+						}
+					} );
+				}
+			} );
+			
+		}
+	} );
+}
+
 </script>
 
 <!-- Mainly scripts -->

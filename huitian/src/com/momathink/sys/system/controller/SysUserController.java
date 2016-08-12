@@ -215,4 +215,19 @@ public class SysUserController extends BaseController {
 			renderJson(0);
 		}
 	}
+	
+	public void updateNetSchoolId() {
+		try {
+			String jwUserId = getPara( "jwSysUserId" );
+			String netSchoolId = getPara( "netAccountId" );
+			SysUser user = SysUser.dao.findById( jwUserId );
+			if( user != null ) {
+				user.set( "netschoolid" , netSchoolId );
+				user.update();
+			}
+		} catch (Exception e) {
+			logger.error( "updateNetSchoolId" , e );
+		}
+		renderJson( "flag" , true );
+	}
 }

@@ -339,7 +339,8 @@ p {
 								layer.msg("请选择要上的课程", 1, 2);
 								return false;
 							}
-							$.ajax({
+							var layerIndex = layer.load( 0 );
+							$.ajax( {
 								type : "post",
 								url : "${cxt}/teacher/save",
 								data : $('#teacherForm').serialize(),
@@ -348,8 +349,38 @@ p {
 									if (data.code == '0') {
 										layer.msg(data.msg, 2, 5);
 									} else {
-										setTimeout("parent.layer.close(index)", 3000);
-										parent.window.location.reload();
+										console.log( data );
+										$.ajax( {
+											url : "",
+											data : data,
+											dataType : "json",
+											type : "post",
+											success : function( pushResult ) {
+												if( pushResult.code == '1' ) {
+													$.ajax( {
+														url : "/sysuser/updateNetSchoolId",
+														data : {
+															"netAccountId" : pushResult.netAccountId ,
+															"jwSysUserId" : data.jwSysUserId
+														},
+														type : "post",
+														success : function( backResult ) {
+															if( !backResult.flag ) {
+																layer.msg( backResult.msg , 2 , 2 );
+															}
+															setTimeout("parent.layer.close(index)", 3000);
+															parent.window.location.reload();
+														}
+													} );
+												} else {
+													layer.msg( pushResult.message , 2 , 2 );
+													setTimeout("parent.layer.close(index)", 3000);
+													parent.window.location.reload();
+												}
+												
+											}
+										} );
+										
 									}
 								}
 							});
@@ -376,8 +407,6 @@ p {
 			}
 		}
 		function chose_mult_set_ini(select, values) {
-			/* alert(select);
-			alert(values); */
 			var arr = values.split('|');
 			var length = arr.length;
 			var value = '';

@@ -1,5 +1,23 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<style type="text/css">
+	.fa {
+	    display: inline-block;
+	    font-family: FontAwesome;
+	    font-style: normal;
+	    font-weight: normal;
+	    line-height: 1;
+	    font-size-adjust: none;
+	    font-stretch: normal;
+	    font-feature-settings: normal;
+	    font-language-override: normal;
+	    font-kerning: auto;
+	    font-synthesis: weight style;
+	    font-variant: normal;
+	    font-size: inherit;
+	    text-rendering: auto;
+	}
+</style>
 
 <div class="navbar-header">
    <a class="navbar-minimalize minimalize-styl-2 btn btn-primary" href="#">
@@ -9,34 +27,17 @@
  
 	</ul>
 </div>
-<style type="text/css">
-.fa {
-    display: inline-block;
-    font-family: FontAwesome;
-    font-style: normal;
-    font-weight: normal;
-    line-height: 1;
-    font-size-adjust: none;
-    font-stretch: normal;
-    font-feature-settings: normal;
-    font-language-override: normal;
-    font-kerning: auto;
-    font-synthesis: weight style;
-    font-variant: normal;
-    font-size: inherit;
-    text-rendering: auto;
-}
-</style>
 
 <div class="top-index" >
 	<ul class="nav navbar-top-links navbar-right nav-topwidth" id="nav-topwidth">
-		<li class="guojihua">
+		<%-- <li class="guojihua">
 				<span class="m-r-sm text-muted">
 					${_res.get("admin.common.sl") }：
 					<input type="button" value="中文" onclick="chengeI18n('zh_CN')" class="btn btn-success btn-outline btn-xs">&nbsp;&nbsp;
 					<input type="button" value="En" onclick="chengeI18n('en_US')" class="btn btn-primary btn-outline btn-xs">
 				</span>
-		</li>
+		</li> --%>
+		<li > <a onclick="entryNetSchool()" > 进入网校 </a> </li>
 		<li class="dropdown">
 			<a class="dropdown-toggle count-info" data-toggle="dropdown" href="index.html#"> 
 				<i class="fa fa-bell"></i> 
@@ -205,4 +206,17 @@ $(document).ready(function(){
 		getMessage();
 	}, 180000); */
 });
+
+	function entryNetSchool() {
+		$.ajax( {
+			url : "",
+			async : false,
+			success : function( result ) {
+				
+			}
+			
+		} );
+	}
+	
+
 </script>

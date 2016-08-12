@@ -88,9 +88,9 @@ h5 {
 								<input type="text" class="layer-date" readonly="readonly" id="date2" name="_query.enddate" value="${paramMap['_query.enddate']}" style="margin-top: -8px; width: 150px;" />
 									<!-- <a href="/student/clock/clockText.jsp">打卡测试</a> --> 
 									<input type="button" onclick="search()" value="${_res.get('admin.common.select') }" class="btn btn-outline btn-info">
-									<c:if test="${operator_session.qx_studentadd }">
+									<%-- <c:if test="${operator_session.qx_studentadd }">
 										<input type="button" value="${_res.get('teacher.group.add')}" onclick="window.location.href='/student/add'"  class="button btn btn-outline btn-success">
-									</c:if>
+									</c:if> --%>
 									<input type="button" value="${_res.get('Output')}" onclick="toExcel()" class="button btn btn-outline btn-success">
 								<div style="clear: both;"></div>
 							</div>

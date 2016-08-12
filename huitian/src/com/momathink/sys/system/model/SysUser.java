@@ -5,6 +5,7 @@ import java.util.List;
 import com.jfinal.plugin.activerecord.Db;
 import com.momathink.common.annotation.model.Table;
 import com.momathink.common.base.BaseModel;
+import com.momathink.common.tools.ToolMD5;
 import com.momathink.common.tools.ToolString;
 /***
  * 账户 管理
@@ -170,8 +171,27 @@ public class SysUser extends BaseModel<SysUser> {
 	 * @return
 	 */
 	public List<SysUser> findAllSysUser() {
-		
 		String sql = " select id ,REAL_NAME,roleids from account where state <> 2 ";
 		return dao.find(sql);
 	}
+	
+	
+	public Integer insertNetUserAccount( String email , String accountName , String netSchoolId  ) {
+		String insertSql = " insert into account( email , real_name , user_pwd , create_time , user_type , netschoolid ) "
+				+ " values ( ? , ? , ? , now() , 0 , ? ) ";
+		Db.update( insertSql , email , accountName , ToolMD5.getMD5( "111111" ) , netSchoolId );
+		SysUser netAccount = SysUser.dao.queryByNetSchoolId( netSchoolId );
+		if( null != netAccount ) {
+			return netAccount.getInt( "id" );
+		}
+		return null;
+	}
+
+	public SysUser queryByNetSchoolId( String netSchoolId ) {
+		String sql = " select id , email ,real_name , user_type , roleids , netschoolid from account where netschoolid = ? ";
+		return dao.findFirst( sql , netSchoolId );
+	}
+	
+	
+	
 }

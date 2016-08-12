@@ -43,7 +43,7 @@
 							    </h5>
 							    <a href="/proxy/list" class="btn btn-xs btn-danger frt m-l-xs " >返回</a>
 							    <a href="/proxy/contract/proxyContract/${proxy.id }" class="btn btn-xs btn-success frt m-l-xs" >合同</a>
-							    <a href="#" class="btn btn-xs btn-primary frt m-l-xs" >合作项目</a>
+							    <a href="/proxy/cooperationProject/${proxy.id }" class="btn btn-xs btn-primary frt m-l-xs" >合作项目</a>
 							    <a href="/proxy/editProxy/${proxy.id }" class="btn btn-xs btn-info frt m-l-xs" >编辑</a>
 			          			<div style="clear:both"></div>
 							</div>

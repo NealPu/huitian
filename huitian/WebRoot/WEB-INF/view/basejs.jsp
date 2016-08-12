@@ -1,5 +1,52 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
+	<!-- Mainly scripts -->
+
+	<script src="/js/js/bootstrap.min.js?v=3.3.0"></script>
+	<script src="/js/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+	<script src="/js/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+	<!-- Flot -->
+	<script src="/js/js/plugins/flot/jquery.flot.js"></script>
+	<script src="/js/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+	<script src="/js/js/plugins/flot/jquery.flot.spline.js"></script>
+	<script src="/js/js/plugins/flot/jquery.flot.resize.js"></script>
+	<script src="/js/js/plugins/flot/jquery.flot.pie.js"></script>
+	<script src="/js/js/plugins/flot/jquery.flot.symbol.js"></script>
+	
+    <!-- Peity -->
+	<script src="/js/js/plugins/peity/jquery.peity.min.js"></script>
+	<script src="/js/js/demo/peity-demo.js"></script>
+
+	<!-- Custom and plugin javascript -->
+	<script src="/js/js/hplus.js?v=2.0.0"></script>
+	<script src="/js/js/plugins/pace/pace.min.js"></script>
+
+	<!-- jQuery UI -->
+	<script src="/js/js/plugins/jquery-ui/jquery-ui.min.js"></script>
+
+	<!-- Jvectormap -->
+	<script src="/js/js/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
+	<script
+		src="/js/js/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+
+	<!-- EayPIE -->
+	<script src="/js/js/plugins/easypiechart/jquery.easypiechart.js"></script>
+
+	<!-- Sparkline -->
+	<script src="/js/js/plugins/sparkline/jquery.sparkline.min.js"></script>
+
+	<!-- Sparkline demo data  -->
+	<script src="/js/js/demo/sparkline-demo.js"></script>
+	
+    <script src="/js/js/top-nav/top-nav.js"></script>
+    <script src="/js/js/plugins/layer/layer.min.js"></script>
+    <script>
+        layer.use('extend/layer.ext.js'); //载入layer拓展模块
+    </script>
+    <!-------- 自定义部分 -------------->
+    	
+
 <script src="/js/js/plugins/chosen/chosen.jquery.js"></script>
 <!-- layer javascript -->
 <script src="/js/js/plugins/layer/layer.min.js"></script>

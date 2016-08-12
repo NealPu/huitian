@@ -2,14 +2,12 @@ package com.momathink.api;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Before;
-import com.momathink.common.annotation.controller.Controller;
 import com.momathink.common.base.BaseController;
 import com.momathink.common.interceptor.IpVerifyInterceptor;
 import com.momathink.common.tools.ToolString;
 import com.momathink.sys.account.model.Account;
 
 @Before(IpVerifyInterceptor.class)
-@Controller(controllerKey="/api")
 public class UserInfoController extends BaseController {
 	public void queryAccountInfoById(){
 		String code="0";

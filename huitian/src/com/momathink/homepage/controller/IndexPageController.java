@@ -6,15 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.plugin.activerecord.Record;
 import com.momathink.common.annotation.controller.Controller;
 import com.momathink.common.base.BaseController;
 import com.momathink.common.tools.ToolDateTime;
+import com.momathink.common.tools.ToolMD5;
 import com.momathink.common.tools.ToolMonitor;
 import com.momathink.crm.opportunity.model.Opportunity;
 import com.momathink.finance.model.CourseOrder;
 import com.momathink.homepage.service.MainService;
+import com.momathink.sys.system.model.SysUser;
 import com.momathink.teaching.student.model.Student;
 import com.momathink.teaching.teacher.model.Announcement;
 import com.momathink.teaching.teacher.model.SetPoint;
@@ -22,6 +26,7 @@ import com.momathink.teaching.teacher.model.SetPoint;
 @Controller(controllerKey="/main")
 public class IndexPageController extends BaseController {
 
+	private static final Logger log = Logger.getLogger( IndexPageController.class );
 	private MainService mainService = new MainService();
 	private  JSONObject json = new JSONObject();
 	public void index(){
@@ -522,6 +527,35 @@ public class IndexPageController extends BaseController {
 		}
 		renderJson(json);
 	}
+	
+	
+	public void queryUserNetAccountId() {
+		JSONObject resultJson = new JSONObject();
+		try {
+			Integer sysUserId  = getSysuserId();
+			SysUser currentUser = SysUser.dao.findById( sysUserId );
+			Integer netSchoolId = currentUser.getInt( "netschoolid" );
+			if( netSchoolId == null ) {
+				resultJson.put( "flag" , false );
+			} else {
+				resultJson.put( "netUserId" , netSchoolId );
+				
+				resultJson.put( "flag" , true );
+				long timestamp = System.currentTimeMillis();
+				resultJson.put( "timestamp" , timestamp );
+				resultJson.put( "signature" , ToolMD5.getMD5( ToolMD5.getMD5( timestamp + "huitian" ) ) );
+			}
+			
+		} catch (Exception e) {
+			log.error( "queryUserNetAccountId" , e );
+			resultJson.put( "flag" , false );
+		}
+		renderJson( resultJson );
+	}
+	
+	
+	
+	
 }
 
 

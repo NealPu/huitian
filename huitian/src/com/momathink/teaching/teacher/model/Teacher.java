@@ -8,6 +8,7 @@ import com.jfinal.plugin.activerecord.Db;
 import com.momathink.common.annotation.model.Table;
 import com.momathink.common.base.BaseModel;
 import com.momathink.common.tools.ToolString;
+import com.momathink.sys.operator.model.Role;
 
 @Table(tableName = "account")
 public class Teacher extends BaseModel<Teacher> {
@@ -107,5 +108,19 @@ public class Teacher extends BaseModel<Teacher> {
 		}
 		return dao.find(sf.toString());
 	}
+	
+	
+	public List<Teacher> queryUnsynchroTeacherAccountList() {
+		Role teacherRole = Role.dao.getRoleByNumbers( "teachers" );
+		String querySql = " select id , real_name , email from account where concat( ',' , roleids ) like ? ";
+		return dao.find( querySql , "%," + teacherRole.getInt( "id" ) + ",%" );
+	}
+	
+	public void updateTeacherNetAccountId( String netSchoolId , String jwUserId ) {
+		String updateSql = " update account set netschoolid = ? where id = ? ";
+		Db.update( updateSql , netSchoolId , jwUserId );
+	}
+	
+	
 	
 }

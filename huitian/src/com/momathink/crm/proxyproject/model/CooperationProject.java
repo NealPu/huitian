@@ -2,6 +2,7 @@ package com.momathink.crm.proxyproject.model;
 
 import java.util.List;
 
+import com.jfinal.plugin.activerecord.Db;
 import com.momathink.common.annotation.model.Table;
 import com.momathink.common.base.BaseModel;
 import com.momathink.common.tools.ToolOperatorSession;
@@ -44,6 +45,33 @@ public class CooperationProject extends BaseModel< CooperationProject > {
 				+ " from cooperationproject project right join proxyproject proxy on proxy.projectid = project.id "
 				+ " where proxy.id = ? and project.state = 0 ";
 		return dao.find( proxySql , proxyId );
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * API 录入网校发送过来的课程
+	 */
+	public Integer addNetCooperationProject( String netCooperateId , String cooperateName ) {
+		String insertSql = " insert into cooperationproject ( projectname , netschoolid ) values ( ? , ? ) ";
+		Db.update( insertSql , cooperateName , netCooperateId );
+		CooperationProject project = queryByNetSchoolId( netCooperateId );
+		if( null != project ) {
+			return project.getInt( "id" );
+		}
+		return null;
+	}
+	
+	public CooperationProject queryByNetSchoolId( String netCooperateId ) {
+		String selectSql = " select id , netschoolid , projectname from cooperationproject where netschoolid = ? ";
+		return dao.findFirst( selectSql , netCooperateId );
 	}
 	
 	
